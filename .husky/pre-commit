@@ -1,0 +1,36 @@
+#!/bin/sh
+# Pre-commit hook: process raw photos and images before committing.
+# Raw files are gitignored; processed outputs in public/ are committed.
+
+set -e
+
+# ── Photos (photos/ → public/photos/) ────────────────────────────────────────
+PHOTOS_DIR="photos"
+PUBLIC_PHOTOS_DIR="public/photos"
+
+RAW_COUNT=$(find "$PHOTOS_DIR" -maxdepth 1 \
+  -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) \
+  ! -name "p-*" 2>/dev/null | wc -l | tr -d '[:space:]')
+
+if [ "$RAW_COUNT" -gt "0" ]; then
+  echo "[photos] Processing $RAW_COUNT raw photo(s)..."
+  npm run photos
+  git add "$PUBLIC_PHOTOS_DIR/" 2>/dev/null || true
+  git add "src/data/photos.json" 2>/dev/null || true
+  echo "[photos] Done."
+fi
+
+# ── Blog images (imgs/ → public/imgs/) ───────────────────────────────────────
+IMGS_DIR="imgs"
+PUBLIC_IMGS_DIR="public/imgs"
+
+RAW_IMGS=$(find "$IMGS_DIR" -maxdepth 1 \
+  -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) \
+  2>/dev/null | wc -l | tr -d '[:space:]')
+
+if [ "$RAW_IMGS" -gt "0" ]; then
+  echo "[imgs] Processing $RAW_IMGS raw image(s)..."
+  npm run imgs
+  git add "$PUBLIC_IMGS_DIR/" 2>/dev/null || true
+  echo "[imgs] Done."
+fi

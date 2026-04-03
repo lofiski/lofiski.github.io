@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title><![CDATA[lofiski's blog]]></title>
+    <link>https://lofiski.github.io</link>
+    <description><![CDATA[写代码，拍照片，读些书。]]></description>
+    <language>zh-CN</language>
+    <atom:link href="https://lofiski.github.io/rss.xml" rel="self" type="application/rss+xml"/>
+    <lastBuildDate>Tue, 24 Mar 2026 03:29:50 GMT</lastBuildDate>
+
+    <item>
+      <title><![CDATA[Hello, World]]></title>
+      <link>https://lofiski.github.io/#/blog/hello-world</link>
+      <guid isPermaLink="false">https://lofiski.github.io/#/blog/hello-world</guid>
+      <pubDate>Sun, 24 Mar 2024 00:00:00 GMT</pubDate>
+      <description><![CDATA[博客开张了，写一篇测试文章，顺便展示 Markdown 与代码高亮的效果。]]></description>
+    </item>
+  </channel>
+</rss>

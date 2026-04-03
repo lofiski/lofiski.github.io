@@ -1,0 +1,35 @@
+[build]
+  command   = "npm run build"
+  publish   = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA fallback — all routes serve index.html
+# (Hash history already handles routing client-side,
+#  but this ensures direct URL access and Netlify previews work correctly)
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options        = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy        = "strict-origin-when-cross-origin"
+    Permissions-Policy     = "camera=(), microphone=(), geolocation=()"
+
+# Long-lived cache for hashed assets (Vite adds content hashes to filenames)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Photos served with a moderate cache
+[[headers]]
+  for = "/photos/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"

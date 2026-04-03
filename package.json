@@ -1,0 +1,42 @@
+{
+  "name": "lofiski-blog",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "photos": "tsx scripts/photos-manage.ts",
+    "imgs": "tsx scripts/imgs-manage.ts",
+    "rss": "tsx scripts/generate-rss.ts",
+    "prepare": "node -e \"try{require('husky').install()}catch(e){}\" || true"
+  },
+  "dependencies": {
+    "@chenglou/pretext": "^0.0.3",
+    "pinia": "^2.3.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@shikijs/markdown-it": "^1.29.2",
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^22.10.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "blurhash": "^2.0.5",
+    "exifreader": "^4.23.3",
+    "fast-glob": "^3.3.2",
+    "gray-matter": "^4.0.3",
+    "husky": "^9.1.7",
+    "markdown-it": "^14.1.0",
+    "markdown-it-anchor": "^9.2.0",
+    "pathe": "^1.1.2",
+    "sharp": "^0.33.5",
+    "shiki": "^1.29.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "unplugin-vue-markdown": "^30.0.0",
+    "vite": "^5.4.11",
+    "vue-tsc": "^2.1.10"
+  }
+}

@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+dist-ssr/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Raw (unprocessed) photos — only processed p-* files are committed
+photos/*
+!photos/p-*.jpg
+!photos/p-*.jpeg
+!photos/p-*.png
+!photos/p-*.webp
+!photos/p-*.json
+!photos/.gitkeep
+
+# Raw (unprocessed) blog/post images — processed output goes to public/imgs/
+imgs/*
+!imgs/.gitkeep
