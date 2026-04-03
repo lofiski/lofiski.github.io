@@ -31,7 +31,7 @@ export async function buildSitemapXml(config: SitemapConfig): Promise<string> {
     if (data.draft) continue
     const slug = basename(filepath, '.md')
     const date = data.date ? new Date(data.date).toISOString().split('T')[0] : undefined
-    urls.push({ loc: `${config.url}/blog/${slug}`, lastmod: date })
+    urls.push({ loc: `${config.url}/#/blog/${slug}`, lastmod: date })
   }
 
   const urlEntries = urls

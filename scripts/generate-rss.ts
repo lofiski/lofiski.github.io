@@ -51,7 +51,7 @@ export async function buildRssXml(config: RssConfig): Promise<string> {
       title: data.title ?? slug,
       date: date.toISOString(),
       description: data.description ?? '',
-      link: `${config.url}/blog/${slug}`,
+      link: `${config.url}/#/blog/${slug}`,
       pubDate: date.toUTCString(),
     })
   }
