@@ -1,0 +1,16 @@
+name = "guestbook-api"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+# 站点允许跨域访问的来源，按你的域名改
+[vars]
+ALLOWED_ORIGIN = "https://125815.xyz"
+
+# 运行 `wrangler d1 create guestbook` 后，把返回的 database_id 填在这里
+[[d1_databases]]
+binding = "DB"
+database_name = "guestbook"
+database_id = "bcc746f0-1958-4a44-9eec-8dd4ee17d025"
+
+# IP_HASH_SALT 是密钥，不要写在这个文件里，用 `wrangler secret put IP_HASH_SALT` 设置：
+# 任意一段随机字符串，用于给提交者 IP 做哈希，避免明文存储

@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { formatDateShort } from '@/utils/format'
 
-const SUPABASE_URL = 'https://thcbvojskjirzbcjhocy.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoY2J2b2pza2ppcnpiY2pob2N5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNjc5NzksImV4cCI6MjA4OTg0Mzk3OX0.lofO69fE_pi56VVqGHQJiw32YqLSu5NG7ZhEcBV_7Gc'
-const EDGE_FN_URL = `${SUPABASE_URL}/functions/v1/submit-guestbook`
+const WORKER_URL = 'https://guestbook-api.airlofi.workers.dev'
 const PAGE_SIZE = 10
 
 interface Message {
@@ -24,23 +23,14 @@ const submitting = ref(false)
 
 const nickname = ref('')
 const content = ref('')
+// 蜜罐字段：真实用户看不到，机器人脚本通常会填上所有输入框
+const website = ref('')
 
 const sentinel = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 
 async function fetchMessages(offset: number): Promise<Message[]> {
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/guestbook_messages` +
-    `?select=id,nickname,content,created_at` +
-    `&order=created_at.desc` +
-    `&limit=${PAGE_SIZE}&offset=${offset}`,
-    {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      },
-    },
-  )
+  const res = await fetch(`${WORKER_URL}/messages?limit=${PAGE_SIZE}&offset=${offset}`)
   if (!res.ok) throw new Error('fetch failed')
   return res.json() as Promise<Message[]>
 }
@@ -66,6 +56,10 @@ async function loadMore() {
     const data = await fetchMessages(messages.value.length)
     messages.value.push(...data)
     hasMore.value = data.length === PAGE_SIZE
+  } catch {
+    // Stop paging rather than let the observer retry the same failing request forever
+    hasMore.value = false
+    fetchError.value = '加载更多失败，请刷新重试'
   } finally {
     loadingMore.value = false
   }
@@ -85,10 +79,10 @@ async function handleSubmit() {
 
   submitting.value = true
   try {
-    const res = await fetch(EDGE_FN_URL, {
+    const res = await fetch(`${WORKER_URL}/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nickname: nick, content: msg }),
+      body: JSON.stringify({ nickname: nick, content: msg, website: website.value }),
     })
     const json = await res.json()
     if (!res.ok) {
@@ -105,14 +99,6 @@ async function handleSubmit() {
   } finally {
     submitting.value = false
   }
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
 }
 
 onMounted(async () => {
@@ -144,7 +130,7 @@ onUnmounted(() => { observer?.disconnect() })
             id="gb-nickname"
             v-model="nickname"
             type="text"
-            class="form-input"
+            class="input"
             placeholder="你的名字"
             maxlength="50"
             autocomplete="off"
@@ -155,13 +141,22 @@ onUnmounted(() => { observer?.disconnect() })
           <textarea
             id="gb-content"
             v-model="content"
-            class="form-textarea"
+            class="input"
             placeholder="写下你想说的话…"
             maxlength="500"
             rows="4"
           />
           <span class="char-count">{{ content.length }}/500</span>
         </div>
+        <input
+          v-model="website"
+          type="text"
+          name="website"
+          class="honeypot"
+          tabindex="-1"
+          autocomplete="off"
+          aria-hidden="true"
+        />
         <div class="form-footer">
           <p v-if="submitError" class="form-msg form-msg--error">{{ submitError }}</p>
           <p v-else-if="submitSuccess" class="form-msg form-msg--ok">留言成功！</p>
@@ -185,7 +180,7 @@ onUnmounted(() => { observer?.disconnect() })
         <li v-for="msg in messages" :key="msg.id" class="message-card">
           <div class="message-header">
             <span class="message-nick">{{ msg.nickname }}</span>
-            <time class="message-time" :datetime="msg.created_at">{{ formatDate(msg.created_at) }}</time>
+            <time class="message-time" :datetime="msg.created_at">{{ formatDateShort(msg.created_at) }}</time>
           </div>
           <p class="message-content">{{ msg.content }}</p>
         </li>
@@ -201,27 +196,6 @@ onUnmounted(() => { observer?.disconnect() })
 </template>
 
 <style scoped>
-.page-header {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
-  margin-bottom: var(--space-6);
-}
-
-.page-title {
-  font-family: var(--font-ui);
-  font-size: var(--text-2xl);
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-}
-
-.page-count {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-}
-
 /* ── Form ───────────────────────── */
 .guestbook-form {
   display: flex;
@@ -243,36 +217,20 @@ onUnmounted(() => { observer?.disconnect() })
   color: var(--text-tertiary);
 }
 
-.form-input,
-.form-textarea {
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  outline: none;
-  resize: vertical;
-  transition: border-color var(--transition);
-}
-
-.form-input::placeholder,
-.form-textarea::placeholder {
-  color: var(--text-tertiary);
-}
-
-.form-input:focus,
-.form-textarea:focus {
-  border-color: var(--accent-border);
-}
-
 .char-count {
   align-self: flex-end;
   font-family: var(--font-ui);
   font-size: var(--text-xs);
   color: var(--text-tertiary);
+}
+
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .form-footer {
@@ -288,7 +246,7 @@ onUnmounted(() => { observer?.disconnect() })
   font-size: var(--text-xs);
 }
 
-.form-msg--error { color: #e07070; }
+.form-msg--error { color: var(--danger); }
 .form-msg--ok    { color: var(--text-accent); }
 
 .submit-btn {
@@ -378,7 +336,7 @@ onUnmounted(() => { observer?.disconnect() })
   text-align: center;
 }
 
-.state-hint--error { color: #e07070; }
+.state-hint--error { color: var(--danger); }
 
 .end-hint {
   display: block;
