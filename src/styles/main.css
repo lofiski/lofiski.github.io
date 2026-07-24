@@ -32,6 +32,8 @@
   --code-bg:        #131110;
   --code-border:    #242018;
 
+  --danger:         #e07070;
+
   /* Typography */
   --font-ui:   'IBM Plex Mono', 'Courier New', monospace;
   --font-body: 'Noto Serif SC', 'Songti SC', 'SimSun', Georgia, serif;
@@ -73,9 +75,13 @@
   /* Transitions */
   --transition: 150ms ease;
   --transition-slow: 300ms ease;
+
+  color-scheme: dark;
 }
 
 [data-theme="light"] {
+  color-scheme: light;
+
   --bg:            #f5f0e8;
   --bg-elevated:   #ede8de;
   --bg-hover:      #e6e0d6;
@@ -99,6 +105,8 @@
 
   --code-bg:        #ede8de;
   --code-border:    #d0c8b8;
+
+  --danger:         #b03535;
 }
 
 /* ─────────────────────────────────────────────
@@ -168,6 +176,70 @@ ul, ol {
 
 .container--wide {
   max-width: var(--max-w-wide);
+}
+
+/* ─────────────────────────────────────────────
+   Page chrome (shared by Blog / Photos / Projects / Guestbook)
+───────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.page-title {
+  font-family: var(--font-ui);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.page-count,
+.page-sub {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.empty-hint {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  padding: var(--space-12) 0;
+  text-align: center;
+  line-height: 1.8;
+}
+
+/* ─────────────────────────────────────────────
+   Form controls
+───────────────────────────────────────────── */
+.input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  outline: none;
+  appearance: none;
+  transition: border-color var(--transition);
+}
+
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.input:focus {
+  border-color: var(--accent-border);
+}
+
+textarea.input {
+  resize: vertical;
+  line-height: 1.7;
 }
 
 /* ─────────────────────────────────────────────
