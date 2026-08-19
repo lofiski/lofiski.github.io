@@ -1,59 +1,57 @@
 <script setup lang="ts">
-import { shallowRef, computed } from 'vue'
+import { shallowRef, computed, watch, onBeforeUnmount } from 'vue'
 import photosData from '@/data/photos.json'
 import type { PhotoMeta } from '@/types'
+import { formatDateLong } from '@/utils/format'
+import Icon from '@/components/Icon.vue'
+import BlurhashCanvas from '@/components/BlurhashCanvas.vue'
 
-const photos = computed<PhotoMeta[]>(() => {
-  return [...(photosData.photos as PhotoMeta[])].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  )
-})
+// Sorted once at module scope — the source JSON never changes at runtime
+const photos: PhotoMeta[] = [...(photosData.photos as PhotoMeta[])].sort(
+  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+)
 
-// shallowRef: replaced wholesale on open/close, no need to track photo object internals
-const selectedPhoto = shallowRef<PhotoMeta | null>(null)
-// shallowRef: always replaced with a new Set (immutable-style update)
+// -1 when the lightbox is closed
+const currentIndex = shallowRef(-1)
+const selectedPhoto = computed(() => photos[currentIndex.value] ?? null)
+
+// shallowRef + whole-Set replacement: mutating a Set in place is not reactive
 const imgErrors = shallowRef<Set<string>>(new Set())
 
-// Derive current index once; used for prev/next button visibility in template
-const currentPhotoIndex = computed(() => {
-  if (!selectedPhoto.value) return -1
-  return photos.value.findIndex(p => p.filename === selectedPhoto.value!.filename)
-})
+const photoUrl = (filename: string) => `/photos/${filename}`
 
-function photoUrl(filename: string) {
-  return `/photos/${filename}`
-}
+const openPhoto = (index: number) => { currentIndex.value = index }
+const closePhoto = () => { currentIndex.value = -1 }
 
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
-}
-
-function openPhoto(photo: PhotoMeta) {
-  selectedPhoto.value = photo
-}
-
-function closePhoto() {
-  selectedPhoto.value = null
+function step(delta: number) {
+  const next = currentIndex.value + delta
+  if (next >= 0 && next < photos.length) currentIndex.value = next
 }
 
 function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') closePhoto()
-  if (e.key === 'ArrowLeft') prevPhoto()
-  if (e.key === 'ArrowRight') nextPhoto()
+  else if (e.key === 'ArrowLeft') step(-1)
+  else if (e.key === 'ArrowRight') step(1)
+  else return
+  e.preventDefault()
 }
 
-function prevPhoto() {
-  if (!selectedPhoto.value) return
-  const idx = photos.value.findIndex(p => p.filename === selectedPhoto.value!.filename)
-  if (idx > 0) selectedPhoto.value = photos.value[idx - 1]
-}
+/*
+ * The lightbox is teleported to <body>, so key handling has to live on window —
+ * it previously sat on a tabindex="-1" wrapper that never received focus.
+ * Also lock page scroll so the grid doesn't slide around behind the overlay.
+ */
+watch(selectedPhoto, (photo) => {
+  const open = photo !== null
+  document.documentElement.classList.toggle('is-locked', open)
+  if (open) window.addEventListener('keydown', onKeydown)
+  else window.removeEventListener('keydown', onKeydown)
+})
 
-function nextPhoto() {
-  if (!selectedPhoto.value) return
-  const idx = photos.value.findIndex(p => p.filename === selectedPhoto.value!.filename)
-  if (idx < photos.value.length - 1) selectedPhoto.value = photos.value[idx + 1]
-}
+onBeforeUnmount(() => {
+  document.documentElement.classList.remove('is-locked')
+  window.removeEventListener('keydown', onKeydown)
+})
 
 function handleImgError(filename: string) {
   imgErrors.value = new Set([...imgErrors.value, filename])
@@ -61,30 +59,28 @@ function handleImgError(filename: string) {
 </script>
 
 <template>
-  <div class="container container--wide" @keydown="onKeydown" tabindex="-1">
-    <div class="photos-header">
+  <div class="container container--wide">
+    <div class="page-header">
       <h1 class="page-title">照片</h1>
-      <span class="photos-count">{{ photos.length }} 张</span>
+      <span class="page-count">{{ photos.length }} 张</span>
     </div>
 
     <!-- Grid -->
     <div v-if="photos.length" class="photos-grid">
       <button
-        v-for="photo in photos"
+        v-for="(photo, index) in photos"
         :key="photo.filename"
         class="photo-thumb"
         :aria-label="`查看照片${photo.title ? ': ' + photo.title : ''}`"
-        @click="openPhoto(photo)"
+        @click="openPhoto(index)"
         :style="{
           aspectRatio: photo.width && photo.height ? `${photo.width} / ${photo.height}` : '4/3',
         }"
       >
-        <!-- Blurhash placeholder -->
-        <canvas
+        <BlurhashCanvas
           v-if="photo.blurhash && !imgErrors.has(photo.filename)"
+          :hash="photo.blurhash"
           class="photo-thumb__blur"
-          :data-blurhash="photo.blurhash"
-          aria-hidden="true"
         />
         <img
           v-if="!imgErrors.has(photo.filename)"
@@ -92,6 +88,7 @@ function handleImgError(filename: string) {
           :alt="photo.title ?? ''"
           class="photo-thumb__img"
           loading="lazy"
+          decoding="async"
           :width="photo.width"
           :height="photo.height"
           @error="handleImgError(photo.filename)"
@@ -116,43 +113,39 @@ function handleImgError(filename: string) {
       >
         <div class="lightbox__content">
           <img
+            :key="selectedPhoto.filename"
             :src="photoUrl(selectedPhoto.filename)"
             :alt="selectedPhoto.title ?? ''"
             class="lightbox__img"
           />
           <div class="lightbox__info">
             <span v-if="selectedPhoto.title" class="lightbox__title">{{ selectedPhoto.title }}</span>
-            <time class="lightbox__date">{{ formatDate(selectedPhoto.date) }}</time>
+            <time class="lightbox__date">{{ formatDateLong(selectedPhoto.date) }}</time>
+            <span class="lightbox__counter">{{ currentIndex + 1 }} / {{ photos.length }}</span>
           </div>
         </div>
 
         <!-- Controls -->
-        <button class="lightbox__close" @click="closePhoto" aria-label="关闭">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path d="M18 6 6 18M6 6l12 12"/>
-          </svg>
+        <button class="lightbox__btn lightbox__close" @click="closePhoto" aria-label="关闭">
+          <Icon name="close" :size="18" />
         </button>
 
         <button
-          v-if="currentPhotoIndex > 0"
-          class="lightbox__nav lightbox__nav--prev"
-          @click="prevPhoto"
+          v-if="currentIndex > 0"
+          class="lightbox__btn lightbox__nav lightbox__nav--prev"
+          @click="step(-1)"
           aria-label="上一张"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path d="m15 18-6-6 6-6"/>
-          </svg>
+          <Icon name="chevronLeft" :size="18" />
         </button>
 
         <button
-          v-if="currentPhotoIndex < photos.length - 1"
-          class="lightbox__nav lightbox__nav--next"
-          @click="nextPhoto"
+          v-if="currentIndex < photos.length - 1"
+          class="lightbox__btn lightbox__nav lightbox__nav--next"
+          @click="step(1)"
           aria-label="下一张"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path d="m9 18 6-6-6-6"/>
-          </svg>
+          <Icon name="chevronRight" :size="18" />
         </button>
       </div>
     </Teleport>
@@ -160,27 +153,6 @@ function handleImgError(filename: string) {
 </template>
 
 <style scoped>
-.photos-header {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
-  margin-bottom: var(--space-8);
-}
-
-.page-title {
-  font-family: var(--font-ui);
-  font-size: var(--text-2xl);
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-}
-
-.photos-count {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-}
-
 /* ── Grid ─────────────────────────── */
 .photos-grid {
   columns: 3 220px;
@@ -210,21 +182,25 @@ function handleImgError(filename: string) {
   inset: 0;
   width: 100%;
   height: 100%;
-  filter: blur(12px);
-  transform: scale(1.05);
+  /*
+    No `filter: blur()` here: it promoted every thumbnail to its own composited
+    layer for the life of the page. The 32×32 buffer is upscaled by the browser,
+    and its default smoothing already produces the blur.
+  */
 }
 
 .photo-thumb__img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   display: block;
   position: relative;
   z-index: 1;
-  transition: transform var(--transition-slow);
-}
-
-.photo-thumb:hover .photo-thumb__img {
-  transform: scale(1.02);
+  /*
+    No load-in fade. Tracking a per-photo "loaded" flag re-rendered the whole
+    grid once per image; an undecoded <img> paints nothing anyway, so the
+    blurhash below simply shows through until the photo is ready.
+  */
 }
 
 .photo-thumb__overlay {
@@ -257,13 +233,11 @@ function handleImgError(filename: string) {
   align-items: center;
   justify-content: center;
   padding: var(--space-8);
-  backdrop-filter: blur(4px);
-  animation: fadeIn 150ms ease;
+  animation: fade-in var(--transition);
 }
 
-@keyframes fadeIn {
+@keyframes fade-in {
   from { opacity: 0; }
-  to   { opacity: 1; }
 }
 
 .lightbox__content {
@@ -294,61 +268,48 @@ function handleImgError(filename: string) {
   color: #e4dbd0;
 }
 
-.lightbox__date {
+.lightbox__date,
+.lightbox__counter {
   color: rgba(228, 219, 208, 0.5);
 }
 
-.lightbox__close {
+.lightbox__counter {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Shared chrome for close / prev / next */
+.lightbox__btn {
   position: fixed;
-  top: var(--space-6);
-  right: var(--space-6);
-  width: 40px;
-  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 44px;
+  height: 44px;
   color: rgba(228, 219, 208, 0.7);
   border-radius: var(--radius-sm);
   transition: color var(--transition), background var(--transition);
 }
 
-.lightbox__close:hover {
+.lightbox__btn:hover {
   color: #e4dbd0;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.lightbox__close {
+  top: var(--space-4);
+  right: var(--space-4);
 }
 
 .lightbox__nav {
-  position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(228, 219, 208, 0.7);
-  border-radius: var(--radius-sm);
-  transition: color var(--transition), background var(--transition);
-}
-
-.lightbox__nav:hover {
-  color: #e4dbd0;
-  background: rgba(255,255,255,0.1);
 }
 
 .lightbox__nav--prev { left: var(--space-4); }
 .lightbox__nav--next { right: var(--space-4); }
 
 /* ── Empty ───────────────────────── */
-.empty-hint {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-  padding: var(--space-16) 0;
-  text-align: center;
-  line-height: 1.8;
-}
-
 .empty-hint code {
   font-family: var(--font-code);
   padding: 1px 5px;
@@ -356,5 +317,31 @@ function handleImgError(filename: string) {
   border: 1px solid var(--code-border);
   border-radius: var(--radius-sm);
   color: var(--text-accent);
+}
+
+/* Narrow screens: give the image the full width, drop the side arrows to the bottom */
+@media (max-width: 640px) {
+  .lightbox {
+    padding: var(--space-4);
+  }
+
+  .lightbox__nav {
+    top: auto;
+    bottom: var(--space-4);
+    transform: none;
+  }
+
+  .lightbox__nav--prev { left: var(--space-6); }
+  .lightbox__nav--next { right: var(--space-6); }
+
+  .lightbox__info {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .lightbox__counter {
+    margin-left: 0;
+  }
 }
 </style>

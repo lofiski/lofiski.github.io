@@ -28,6 +28,7 @@ const website = ref('')
 
 const sentinel = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
+let successTimer: ReturnType<typeof setTimeout> | undefined
 
 async function fetchMessages(offset: number): Promise<Message[]> {
   const res = await fetch(`${WORKER_URL}/messages?limit=${PAGE_SIZE}&offset=${offset}`)
@@ -93,7 +94,8 @@ async function handleSubmit() {
     nickname.value = ''
     content.value = ''
     submitSuccess.value = true
-    setTimeout(() => { submitSuccess.value = false }, 3000)
+    clearTimeout(successTimer)
+    successTimer = setTimeout(() => { submitSuccess.value = false }, 3000)
   } catch {
     submitError.value = '网络错误，请稍后重试'
   } finally {
@@ -110,7 +112,10 @@ onMounted(async () => {
   if (sentinel.value) observer.observe(sentinel.value)
 })
 
-onUnmounted(() => { observer?.disconnect() })
+onUnmounted(() => {
+  observer?.disconnect()
+  clearTimeout(successTimer)
+})
 </script>
 
 <template>

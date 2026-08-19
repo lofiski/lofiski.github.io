@@ -5,15 +5,15 @@ const router = useRouter()
 
 <template>
   <div class="container not-found">
-    <div class="not-found__glitch" aria-hidden="true">404</div>
+    <div class="not-found__num" aria-hidden="true">404</div>
     <h1 class="not-found__title">页面不存在</h1>
     <p class="not-found__desc">
       你访问的路径不在这里。<br>
       可能是链接失效，或者从未存在过。
     </p>
     <div class="not-found__actions">
-      <button class="not-found__btn" @click="router.push('/')">← 返回首页</button>
-      <button class="not-found__btn not-found__btn--secondary" @click="router.back()">↩ 上一页</button>
+      <button class="text-btn" @click="router.push('/')">← 返回首页</button>
+      <button class="text-btn not-found__btn--secondary" @click="router.back()">↩ 上一页</button>
     </div>
   </div>
 </template>
@@ -25,10 +25,9 @@ const router = useRouter()
   align-items: flex-start;
   padding-top: var(--space-20);
   padding-bottom: var(--space-20);
-  position: relative;
 }
 
-.not-found__glitch {
+.not-found__num {
   font-family: var(--font-ui);
   font-size: clamp(6rem, 20vw, 12rem);
   font-weight: 600;
@@ -37,17 +36,7 @@ const router = useRouter()
   -webkit-text-stroke: 1px var(--border);
   letter-spacing: -0.05em;
   margin-bottom: var(--space-8);
-  position: relative;
   user-select: none;
-}
-
-.not-found__glitch::before {
-  content: '404';
-  position: absolute;
-  inset: 0;
-  color: var(--text-accent);
-  opacity: 0.08;
-  transform: translate(-2px, 2px);
 }
 
 .not-found__title {
@@ -73,27 +62,11 @@ const router = useRouter()
   align-items: center;
 }
 
-.not-found__btn {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition: color var(--transition);
-  padding: var(--space-2) 0;
-}
-
-.not-found__btn:hover {
-  color: var(--text-accent);
-}
-
 .not-found__btn--secondary {
-  color: var(--text-tertiary);
   opacity: 0.6;
 }
 
 .not-found__btn--secondary:hover {
-  color: var(--text-secondary);
   opacity: 1;
 }
 </style>

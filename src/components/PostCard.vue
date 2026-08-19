@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import type { PostMeta } from '@/types'
+import { formatDateShort } from '@/utils/format'
 
 defineProps<{
   post: PostMeta
@@ -8,13 +9,6 @@ defineProps<{
 }>()
 
 const router = useRouter()
-
-function formatDate(dateStr: string) {
-  if (!dateStr) return ''
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
-    .replace(/\//g, '-')
-}
 
 function goTag(e: MouseEvent, tag: string) {
   e.preventDefault()
@@ -25,7 +19,7 @@ function goTag(e: MouseEvent, tag: string) {
 
 <template>
   <RouterLink :to="`/blog/${post.slug}`" class="post-card" :class="{ 'post-card--compact': compact }">
-    <time :datetime="post.date" class="post-card__date">{{ formatDate(post.date) }}</time>
+    <time :datetime="post.date" class="post-card__date">{{ formatDateShort(post.date) }}</time>
     <div class="post-card__body">
       <h3 class="post-card__title">{{ post.title }}</h3>
       <p v-if="post.description && !compact" class="post-card__desc">{{ post.description }}</p>
@@ -38,35 +32,27 @@ function goTag(e: MouseEvent, tag: string) {
         >{{ tag }}</button>
       </div>
     </div>
-    <svg class="post-card__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-      <path d="M5 12h14M12 5l7 7-7 7"/>
-    </svg>
   </RouterLink>
 </template>
 
 <style scoped>
 .post-card {
   display: grid;
-  grid-template-columns: 90px 1fr 20px;
+  grid-template-columns: 90px 1fr;
   gap: var(--space-4);
   align-items: start;
   padding: var(--space-4) 0;
   border-bottom: 1px solid var(--border-subtle);
   cursor: pointer;
-  transition: background var(--transition);
 }
 
 .post-card:first-child {
   border-top: 1px solid var(--border-subtle);
 }
 
+/* Colour shift on the title is the whole hover affordance — no sliding arrow. */
 .post-card:hover .post-card__title {
   color: var(--text-accent);
-}
-
-.post-card:hover .post-card__arrow {
-  opacity: 1;
-  transform: translateX(2px);
 }
 
 .post-card__date {
@@ -109,16 +95,16 @@ function goTag(e: MouseEvent, tag: string) {
   margin-top: var(--space-3);
 }
 
-.post-card__arrow {
-  opacity: 0;
-  color: var(--text-accent);
-  transition: opacity var(--transition), transform var(--transition);
-  margin-top: 3px;
-  flex-shrink: 0;
-}
-
 /* Compact variant (homepage) */
 .post-card--compact {
   padding: var(--space-3) 0;
+}
+
+/* Narrow screens: the fixed 90px date column squeezes titles — stack instead */
+@media (max-width: 520px) {
+  .post-card {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
 }
 </style>

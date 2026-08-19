@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { shallowRef, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 
 const props = defineProps<{ scanKey: number }>()
 
@@ -9,10 +9,11 @@ interface Heading {
   level: number  // 2, 3, or 4
 }
 
-const headings = ref<Heading[]>([])
-const activeId = ref('')
-const collapsed = ref(false)
-const showTop = ref(false)
+// shallowRef: the heading list is always replaced wholesale, never mutated in place
+const headings = shallowRef<Heading[]>([])
+const activeId = shallowRef('')
+const collapsed = shallowRef(false)
+const showTop = shallowRef(false)
 
 function scanHeadings() {
   const content = document.querySelector('.post__content')
@@ -69,6 +70,7 @@ function onScroll() {
 }
 
 onMounted(() => {
+  onScroll()  // deep-linking straight into a post should show the button immediately
   window.addEventListener('scroll', onScroll, { passive: true })
 })
 
@@ -116,7 +118,7 @@ onBeforeUnmount(() => {
   </aside>
 
   <!-- Back to top -->
-  <Transition name="fade-up">
+  <Transition name="fade">
     <button
       v-if="showTop"
       class="back-top"
@@ -141,7 +143,6 @@ onBeforeUnmount(() => {
   border-radius: var(--radius-md);
   overflow: hidden;
   z-index: 40;
-  transition: width var(--transition);
 }
 
 /* Collapsed: shrink to just the header strip */
@@ -249,15 +250,14 @@ onBeforeUnmount(() => {
 }
 
 /* ── Transition ───────────────────────────────── */
-.fade-up-enter-active,
-.fade-up-leave-active {
-  transition: opacity var(--transition), transform var(--transition);
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity var(--transition);
 }
 
-.fade-up-enter-from,
-.fade-up-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
-  transform: translateY(8px);
 }
 
 /* ── Responsive: hide TOC on narrow screens ───── */

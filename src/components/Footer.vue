@@ -12,7 +12,7 @@ const year = new Date().getFullYear()
       <a href="/rss.xml" class="footer__link">RSS</a>
       <span class="footer__sep" aria-hidden="true">·</span>
       <a
-        :href="`https://github.com/${siteConfig.github}/lofiski.github.io`"
+        :href="`https://github.com/${siteConfig.repo}`"
         target="_blank"
         rel="noopener noreferrer"
         class="footer__link"

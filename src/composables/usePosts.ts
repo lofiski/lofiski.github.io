@@ -1,13 +1,17 @@
-import { computed } from 'vue'
 import type { PostMeta, PostFrontmatter } from '@/types'
 
+/**
+ * unplugin-vue-markdown exposes frontmatter as *individual named exports*
+ * (`title`, `date`, …) — there is no `frontmatter` export. Reading one is the
+ * fallback path; `usePosts()` parses the raw text itself and is authoritative.
+ */
 interface PostModule {
   default: object
-  frontmatter?: PostFrontmatter
+  title?: string
+  date?: string
+  description?: string
+  tags?: string[]
 }
-
-// All .md files in /posts/ — loaded eagerly (component + optional frontmatter)
-const modules = import.meta.glob<PostModule>('/posts/*.md', { eager: true })
 
 // Raw markdown text — used for frontmatter parsing and full-text search
 const rawModules = import.meta.glob<string>('/posts/*.md', { query: '?raw', import: 'default', eager: true })
@@ -41,25 +45,23 @@ function parseFrontmatter(raw: string): PostFrontmatter {
   return result as PostFrontmatter
 }
 
-export function usePosts() {
-  const allPosts = computed<PostMeta[]>(() => {
-    return Object.entries(rawModules)
-      .map(([path, raw]) => {
-        const slug = path.replace('/posts/', '').replace('.md', '')
-        const fm = parseFrontmatter(raw)
-        return {
-          slug,
-          ...fm,
-          title: fm.title ?? slug,
-          date: fm.date ?? '',
-          content: raw,
-        }
-      })
-      .filter(p => !p.draft)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+// The post set is fixed at build time, so parse and sort once at module scope
+// rather than re-deriving it inside a computed on every consumer.
+const posts: PostMeta[] = Object.entries(rawModules)
+  .map(([path, raw]) => {
+    const slug = path.slice('/posts/'.length, -'.md'.length)
+    const fm = parseFrontmatter(raw)
+    return { slug, ...fm, title: fm.title ?? slug, date: fm.date ?? '', content: raw }
   })
+  .filter(p => !p.draft)
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-  return { allPosts }
+/**
+ * The list is a build-time constant, so it is handed out as a plain array —
+ * wrapping it in a `computed` only added a reactive layer that could never change.
+ */
+export function usePosts() {
+  return { allPosts: posts }
 }
 
 // Lazy post module map for dynamic loading in PostPage

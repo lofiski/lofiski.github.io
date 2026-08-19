@@ -1,31 +1,33 @@
 <script setup lang="ts">
-import { shallowRef, watchEffect, watch, nextTick, onBeforeUnmount, markRaw, ref } from 'vue'
+import { shallowRef, watch, nextTick, onBeforeUnmount, markRaw } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { postModules } from '@/composables/usePosts'
+import { postModules, usePosts } from '@/composables/usePosts'
 import type { PostFrontmatter } from '@/types'
+import { formatDateLong } from '@/utils/format'
+import { setDocumentTitle } from '@/router'
 import TableOfContents from '@/components/TableOfContents.vue'
 
 const route = useRoute()
 const router = useRouter()
+const { allPosts } = usePosts()
 
-const scanKey = ref(0)
+// Bumped after each post renders so the TOC re-scans the new headings
+const scanKey = shallowRef(0)
 
-// shallowRef: PostComponent is opaque (Vue component object) replaced wholesale
+// shallowRef throughout: these hold primitives or opaque objects replaced wholesale
 const PostComponent = shallowRef<object | null>(null)
-// shallowRef: frontmatter object is replaced entirely on each navigation, no deep tracking needed
 const frontmatter = shallowRef<PostFrontmatter | null>(null)
-// shallowRef: primitives
 const loading = shallowRef(true)
 const notFound = shallowRef(false)
+const contentEl = shallowRef<HTMLElement | null>(null)
 
-watchEffect(async () => {
-  const slug = route.params.slug as string
-  const key = `/posts/${slug}.md`
-  const loader = postModules[key]
+async function loadPost(slug: string) {
+  const loader = postModules[`/posts/${slug}.md`]
 
   loading.value = true
   notFound.value = false
   PostComponent.value = null
+  frontmatter.value = null
 
   if (!loader) {
     notFound.value = true
@@ -36,7 +38,18 @@ watchEffect(async () => {
   try {
     const mod = await loader()
     PostComponent.value = markRaw(mod.default as object)
-    frontmatter.value = mod.frontmatter ?? null
+    /*
+     * The post list is the authoritative frontmatter source — it parses the raw
+     * markdown itself. The module's named exports are only a fallback for drafts,
+     * which are filtered out of the list but still reachable by direct URL.
+     * (There is no `mod.frontmatter`; reading one silently blanked this header.)
+     */
+    frontmatter.value = allPosts.find(p => p.slug === slug) ?? {
+      title: mod.title ?? slug,
+      date: mod.date ?? '',
+      description: mod.description,
+      tags: mod.tags,
+    }
   }
   catch {
     notFound.value = true
@@ -44,74 +57,84 @@ watchEffect(async () => {
   finally {
     loading.value = false
   }
+}
+
+watch(() => route.params.slug as string, loadPost, { immediate: true })
+
+watch([frontmatter, notFound], ([fm, missing]) => {
+  if (missing) setDocumentTitle('文章不存在')
+  else if (fm?.title) setDocumentTitle(fm.title)
 })
 
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
-}
-
-function goTag(tag: string) {
-  router.push({ path: '/blog', query: { tag } })
-}
+const goBlog = () => router.push('/blog')
+const goTag = (tag: string) => router.push({ path: '/blog', query: { tag } })
 
 // ── Copy buttons ────────────────────────────────────────────
-let cleanupCopy: (() => void) | null = null
+// Shiki's <pre> blocks live outside Vue's template control, so the buttons are
+// appended by hand. Clicks are handled by one delegated listener on the content
+// wrapper (see @click in the template) instead of one listener per block.
+const COPY_IDLE = '复制'
+let resetTimer: ReturnType<typeof setTimeout> | undefined
+let pendingBtn: HTMLElement | null = null
+
+function resetPendingBtn() {
+  if (!pendingBtn) return
+  pendingBtn.textContent = COPY_IDLE
+  pendingBtn.classList.remove('copy-btn--copied')
+  pendingBtn = null
+}
 
 watch(PostComponent, async (val) => {
-  cleanupCopy?.()
-  cleanupCopy = null
+  clearTimeout(resetTimer)
+  pendingBtn = null
   if (!val) return
+
+  scanKey.value++
   await nextTick()
 
-  const pres = document.querySelectorAll<HTMLElement>('.post__content pre')
-  const offs: (() => void)[] = []
-
-  pres.forEach(pre => {
+  contentEl.value?.querySelectorAll('pre').forEach((pre) => {
     if (pre.querySelector('.copy-btn')) return
-
     const btn = document.createElement('button')
     btn.className = 'copy-btn'
+    btn.type = 'button'
     btn.setAttribute('aria-label', '复制代码')
-    btn.textContent = '复制'
+    btn.textContent = COPY_IDLE
     pre.appendChild(btn)
-
-    async function handler() {
-      const text = pre.querySelector('code')?.textContent ?? ''
-      await navigator.clipboard.writeText(text)
-      btn.textContent = '已复制'
-      btn.classList.add('copy-btn--copied')
-      setTimeout(() => {
-        btn.textContent = '复制'
-        btn.classList.remove('copy-btn--copied')
-      }, 2000)
-    }
-
-    btn.addEventListener('click', handler)
-    offs.push(() => btn.removeEventListener('click', handler))
   })
-
-  cleanupCopy = () => offs.forEach(fn => fn())
 })
 
-onBeforeUnmount(() => { cleanupCopy?.(); cleanupCopy = null })
+async function onContentClick(e: MouseEvent) {
+  const btn = (e.target as HTMLElement).closest?.('.copy-btn') as HTMLElement | null
+  if (!btn) return
 
-watch(PostComponent, (val) => {
-  if (val) scanKey.value++
-})
+  clearTimeout(resetTimer)
+  resetPendingBtn()
+
+  try {
+    await navigator.clipboard.writeText(btn.parentElement?.querySelector('code')?.textContent ?? '')
+    btn.textContent = '已复制'
+  }
+  catch {
+    // Clipboard is unavailable on insecure origins / denied permission
+    btn.textContent = '复制失败'
+  }
+  btn.classList.add('copy-btn--copied')
+  pendingBtn = btn
+  resetTimer = setTimeout(resetPendingBtn, 2000)
+}
+
+onBeforeUnmount(() => clearTimeout(resetTimer))
 </script>
 
 <template>
   <div class="container">
-    <!-- Loading -->
-    <div v-if="loading" class="loading" aria-live="polite" aria-busy="true">
-      <span class="loading__dot" />
-    </div>
+    <!-- Loading: reserves height so the footer doesn't jump, without an animation -->
+    <div v-if="loading" class="loading" aria-live="polite" aria-busy="true" />
 
     <!-- Not found -->
     <div v-else-if="notFound" class="not-found">
       <p class="not-found__msg">文章不存在。</p>
-      <button class="back-btn" @click="router.push('/blog')">← 返回 Blog</button>
+      <button class="text-btn" @click="goBlog">← 返回 Blog</button>
     </div>
 
     <!-- Post -->
@@ -119,11 +142,11 @@ watch(PostComponent, (val) => {
       <!-- Header -->
       <header class="post__header">
         <div class="post__meta">
-          <button class="back-btn" @click="router.push('/blog')" aria-label="返回文章列表">
+          <button class="text-btn" @click="goBlog" aria-label="返回文章列表">
             ← Blog
           </button>
           <time v-if="frontmatter?.date" :datetime="frontmatter.date" class="post__date">
-            {{ formatDate(frontmatter.date) }}
+            {{ formatDateLong(frontmatter.date) }}
           </time>
         </div>
         <h1 class="post__title">{{ frontmatter?.title }}</h1>
@@ -143,13 +166,13 @@ watch(PostComponent, (val) => {
       <hr class="post__divider" />
 
       <!-- Content (rendered .md as Vue component) -->
-      <div class="prose post__content">
+      <div ref="contentEl" class="prose post__content" @click="onContentClick">
         <component :is="PostComponent" />
       </div>
 
       <!-- Footer nav -->
       <div class="post__footer">
-        <button class="back-btn" @click="router.push('/blog')">← 返回文章列表</button>
+        <button class="text-btn" @click="goBlog">← 返回文章列表</button>
       </div>
     </article>
 
@@ -160,22 +183,7 @@ watch(PostComponent, (val) => {
 
 <style scoped>
 .loading {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-20) 0;
-}
-
-.loading__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--text-tertiary);
-  animation: pulse 1.2s ease infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
+  min-height: 60vh;
 }
 
 .not-found {
@@ -187,20 +195,6 @@ watch(PostComponent, (val) => {
   font-family: var(--font-ui);
   color: var(--text-tertiary);
   margin-bottom: var(--space-4);
-}
-
-.back-btn {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  letter-spacing: 0.04em;
-  padding: var(--space-1) 0;
-  transition: color var(--transition);
-  cursor: pointer;
-}
-
-.back-btn:hover {
-  color: var(--text-accent);
 }
 
 /* ── Post Header ─────────────────── */

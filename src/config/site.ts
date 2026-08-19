@@ -1,6 +1,6 @@
 export const siteConfig = {
   /** 站点名称 */
-  name: '周天子的雪山',
+  name: 'airlofi',
   /** 站点标题 */
   title: "lofiski's space",
   /** 个人简介 */
@@ -19,12 +19,14 @@ export const siteConfig = {
   url: 'https://125815.xyz',
   /** GitHub 用户名 */
   github: 'lofiski',
+  /** 本站源码仓库（owner/repo） */
+  repo: 'lofiski/lofiski.github.io',
   /** X (Twitter) 用户名 */
   twitter: 'maze1368',
   /** Email */
   email: 'mail@125815.xyz',
   /** RSS 标题 */
-  rssTitle: "周天子的雪山",
+  rssTitle: 'airlofi',
   /** RSS 描述 */
   rssDescription: '在这分享自己的项目、照片、碎碎念、动态以及读书笔记',
 }

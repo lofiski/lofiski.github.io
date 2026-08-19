@@ -16,27 +16,23 @@ watch(() => route.query.tag, (t) => {
   selectedTag.value = (t as string) || null
 })
 
-const allTags = computed(() => {
-  const tagSet = new Set<string>()
-  allPosts.value.forEach(p => p.tags?.forEach(t => tagSet.add(t)))
-  return [...tagSet].sort()
-})
+// The post list is a build-time constant, so the tag set and the search haystack
+// are derived once on mount rather than re-evaluated as the query changes.
+const allTags = [...new Set(allPosts.flatMap(p => p.tags ?? []))].sort()
+
+const searchIndex = allPosts.map(p =>
+  [p.title, p.description, p.tags?.join(' '), p.content]
+    .filter(Boolean).join('\n').toLowerCase(),
+)
 
 const filteredPosts = computed(() => {
-  let posts = allPosts.value
-  if (searchQuery.value.trim()) {
-    const q = searchQuery.value.toLowerCase()
-    posts = posts.filter(p =>
-      p.title.toLowerCase().includes(q) ||
-      p.description?.toLowerCase().includes(q) ||
-      p.tags?.some(t => t.toLowerCase().includes(q)) ||
-      p.content?.toLowerCase().includes(q),
-    )
-  }
-  if (selectedTag.value) {
-    posts = posts.filter(p => p.tags?.includes(selectedTag.value!))
-  }
-  return posts
+  const q = searchQuery.value.trim().toLowerCase()
+  const tag = selectedTag.value
+  if (!q && !tag) return allPosts
+  return allPosts.filter((p, i) =>
+    (!q || searchIndex[i].includes(q))
+    && (!tag || !!p.tags?.includes(tag)),
+  )
 })
 
 function toggleTag(tag: string) {
@@ -48,9 +44,9 @@ function toggleTag(tag: string) {
 
 <template>
   <div class="container">
-    <div class="blog-header">
+    <div class="page-header">
       <h1 class="page-title">博客</h1>
-      <span class="blog-count">{{ allPosts.length }} 篇</span>
+      <span class="page-count">{{ allPosts.length }} 篇</span>
     </div>
 
     <!-- Filters -->
@@ -59,7 +55,7 @@ function toggleTag(tag: string) {
         v-model="searchQuery"
         type="search"
         placeholder="搜索文章…"
-        class="search-input"
+        class="input"
         aria-label="搜索文章"
       />
       <div v-if="allTags.length" class="tag-filters" role="group" aria-label="按标签筛选">
@@ -90,54 +86,11 @@ function toggleTag(tag: string) {
 </template>
 
 <style scoped>
-.blog-header {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
-  margin-bottom: var(--space-6);
-}
-
-.page-title {
-  font-family: var(--font-ui);
-  font-size: var(--text-2xl);
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-}
-
-.blog-count {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-}
-
 .filters {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   margin-bottom: var(--space-4);
-}
-
-.search-input {
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  transition: border-color var(--transition);
-  outline: none;
-  appearance: none;
-}
-
-.search-input::placeholder {
-  color: var(--text-tertiary);
-}
-
-.search-input:focus {
-  border-color: var(--accent-border);
 }
 
 .tag-filters {
@@ -146,22 +99,9 @@ function toggleTag(tag: string) {
   gap: var(--space-2);
 }
 
-.tag {
-  cursor: pointer;
-  transition: background var(--transition), border-color var(--transition), color var(--transition);
-}
-
 .tag--active {
   background: var(--accent-subtle);
   border-color: var(--accent);
   color: var(--text-accent);
-}
-
-.empty-hint {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-  padding: var(--space-12) 0;
-  text-align: center;
 }
 </style>

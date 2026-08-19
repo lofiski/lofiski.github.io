@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { siteConfig } from '@/config/site'
 import { usePosts } from '@/composables/usePosts'
 import { projects } from '@/data/projects'
 import PostCard from '@/components/PostCard.vue'
+import Icon from '@/components/Icon.vue'
 
+const RECENT_LIMIT = 5
+
+// Both lists come from build-time constants — derive them once, no reactivity needed
 const { allPosts } = usePosts()
-const recentPosts = computed(() => allPosts.value.slice(0, 5))
-const featuredProjects = computed(() => projects.filter(p => p.featured).slice(0, 3))
+const recentPosts = allPosts.slice(0, RECENT_LIMIT)
+const featuredProjects = projects.filter(p => p.featured).slice(0, 3)
 
 const isMainDomain = typeof window !== 'undefined' && window.location.hostname === '125815.xyz'
 </script>
@@ -38,27 +41,22 @@ const isMainDomain = typeof window !== 'undefined' && window.location.hostname =
         
         <!-- ── 自定义内容：直接在这里写 ────────────── -->
         <p class="profile__custom">
-          在 <RouterLink to="/blog" class="profile__link">博客</RouterLink> 写文章，
-          在 <RouterLink to="/projects" class="profile__link">项目</RouterLink> 放开发的东西，
-          在 <RouterLink to="/photos" class="profile__link">照片</RouterLink> 记录拍过的画面。
+          在 <RouterLink to="/blog" class="link">博客</RouterLink> 写文章，
+          在 <RouterLink to="/projects" class="link">项目</RouterLink> 放开发的东西，
+          在 <RouterLink to="/photos" class="link">照片</RouterLink> 记录拍过的画面。
         </p>
 
-        <!-- 如需联系与，邮箱是，留言板也可以 -->
-        
         <p class="profile__custom">
-          如需联系，邮箱是 <a href="mailto:hwmaze1368@gmail.com" class="profile__link">{{ siteConfig.email }}</a>，
-          要留言或查看其他人的留言 <RouterLink to="/guestbook" class="profile__link">点这里</RouterLink>。
+          如需联系，邮箱是 <a :href="`mailto:${siteConfig.email}`" class="link">{{ siteConfig.email }}</a>，
+          要留言或查看其他人的留言 <RouterLink to="/guestbook" class="link">点这里</RouterLink>。
         </p>
 
         <p class="profile__custom">
           <a
             :href="isMainDomain ? 'https://blog.125815.xyz/' : 'https://125815.xyz/'"
-            class="profile__link"
+            class="link"
           >{{ isMainDomain ? '中国大陆网络访问该网站如卡顿可点击这里！' : '点击这里回到主域名！' }}</a>
         </p>
-        
-
-        <!-- ── Interests ─────────────────────────────── -->
 
         <div class="profile__interests">
           <span v-for="item in siteConfig.interests" :key="item" class="tag">{{ item }}</span>
@@ -77,11 +75,9 @@ const isMainDomain = typeof window !== 'undefined' && window.location.hostname =
           :post="post"
           compact
         />
-        <RouterLink v-if="allPosts.length > 5" to="/blog" class="view-all">
+        <RouterLink v-if="allPosts.length > RECENT_LIMIT" to="/blog" class="text-btn view-all">
           全部文章 ({{ allPosts.length }})
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-          </svg>
+          <Icon name="arrowRight" :size="12" />
         </RouterLink>
       </div>
 
@@ -104,9 +100,7 @@ const isMainDomain = typeof window !== 'undefined' && window.location.hostname =
             <span class="project-item__name">{{ project.name }}</span>
             <div class="project-item__links">
               <span v-if="project.wip" class="tag">WIP</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/>
-              </svg>
+              <Icon name="external" :size="12" />
             </div>
           </div>
           <p class="project-item__desc">{{ project.description }}</p>
@@ -115,11 +109,9 @@ const isMainDomain = typeof window !== 'undefined' && window.location.hostname =
           </div>
         </a>
       </div>
-      <RouterLink to="/projects" class="view-all">
+      <RouterLink to="/projects" class="text-btn view-all">
         所有项目
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
+        <Icon name="arrowRight" :size="12" />
       </RouterLink>
     </section>
   </div>
@@ -205,31 +197,8 @@ const isMainDomain = typeof window !== 'undefined' && window.location.hostname =
   line-height: 1.7;
 }
 
-.profile__link {
-  color: var(--text-accent);
-  border-bottom: 1px solid var(--accent-border);
-  transition: color var(--transition), border-color var(--transition);
-}
-
-.profile__link:hover {
-  color: var(--text-accent-hover);
-  border-color: var(--accent);
-}
-
-/* ── View All ────────────────────── */
 .view-all {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
   margin-top: var(--space-4);
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  transition: color var(--transition);
-}
-
-.view-all:hover {
-  color: var(--text-accent);
 }
 
 /* ── Projects ──────────────────────── */
@@ -288,14 +257,6 @@ const isMainDomain = typeof window !== 'undefined' && window.location.hostname =
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-}
-
-/* ── Empty state ─────────────────── */
-.empty-hint {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-  padding: var(--space-8) 0;
 }
 
 /* ── Mobile ──────────────────────── */
