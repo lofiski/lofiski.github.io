@@ -22,7 +22,7 @@ export const siteConfig = {
   /** 本站源码仓库（owner/repo） */
   repo: 'lofiski/lofiski.github.io',
   /** X (Twitter) 用户名 */
-  twitter: 'maze1368',
+  twitter: 'airlofi',
   /** Email */
   email: 'mail@125815.xyz',
   /** RSS 标题 */

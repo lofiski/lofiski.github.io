@@ -11,8 +11,6 @@ const RECENT_LIMIT = 5
 const { allPosts } = usePosts()
 const recentPosts = allPosts.slice(0, RECENT_LIMIT)
 const featuredProjects = projects.filter(p => p.featured).slice(0, 3)
-
-const isMainDomain = typeof window !== 'undefined' && window.location.hostname === '125815.xyz'
 </script>
 
 <template>
@@ -49,13 +47,6 @@ const isMainDomain = typeof window !== 'undefined' && window.location.hostname =
         <p class="profile__custom">
           如需联系，邮箱是 <a :href="`mailto:${siteConfig.email}`" class="link">{{ siteConfig.email }}</a>，
           要留言或查看其他人的留言 <RouterLink to="/guestbook" class="link">点这里</RouterLink>。
-        </p>
-
-        <p class="profile__custom">
-          <a
-            :href="isMainDomain ? 'https://blog.125815.xyz/' : 'https://125815.xyz/'"
-            class="link"
-          >{{ isMainDomain ? '中国大陆网络访问该网站如卡顿可点击这里！' : '点击这里回到主域名！' }}</a>
         </p>
 
         <div class="profile__interests">
