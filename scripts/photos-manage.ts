@@ -77,6 +77,32 @@ for (const filepath of rawFiles) {
   }
 
   if (!captureDate) {
+    /*
+     * Before trusting the filesystem, try the filename. Phone cameras name files
+     * `IMG_20260603_192528.jpg` / `PXL_20240101_123456789.jpg`, and that date
+     * survives copying, syncing and re-encoding — all of which reset the file
+     * timestamps. Plenty of otherwise-intact photos reach here with their EXIF
+     * date tags stripped, and without this they all fall into the "too recent"
+     * skip below the moment they're copied into `photos/`.
+     */
+    const m = basename(filepath).match(/(?:^|\D)(\d{4})(\d{2})(\d{2})(?:\D?(\d{2})(\d{2})(\d{2}))?(?:\D|$)/)
+    if (m) {
+      const [, y, mo, d, hh = '12', mm = '00', ss = '00'] = m
+      const parsed = new Date(
+        Number(y), Number(mo) - 1, Number(d),
+        Number(hh), Number(mm), Number(ss),
+      )
+      // Guard against filenames that merely *look* like a date (ids, dimensions)
+      const plausible = parsed.getFullYear() === Number(y)
+        && parsed.getMonth() === Number(mo) - 1
+        && parsed.getDate() === Number(d)
+        && parsed.getTime() <= Date.now()
+        && parsed.getFullYear() >= 1990
+      if (plausible) captureDate = parsed
+    }
+  }
+
+  if (!captureDate) {
     // Fall back to filesystem: take the earlier of birthtime / mtime
     const stat = await fs.stat(filepath)
     const birthtime = stat.birthtime.getTime() || Infinity
