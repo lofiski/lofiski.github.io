@@ -21,7 +21,7 @@ import Footer from '@/components/Footer.vue'
 <style scoped>
 .main {
   min-height: calc(100dvh - var(--nav-h) - 80px);
-  padding-top: var(--space-12);
-  padding-bottom: var(--space-20);
+  padding-top: var(--space-16);
+  padding-bottom: var(--space-24);
 }
 </style>

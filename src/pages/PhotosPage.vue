@@ -60,10 +60,11 @@ function handleImgError(filename: string) {
 
 <template>
   <div class="container container--wide">
-    <div class="page-header">
+    <header class="page-header">
+      <p class="eyebrow">photographs</p>
       <h1 class="page-title">照片</h1>
-      <span class="page-count">{{ photos.length }} 张</span>
-    </div>
+      <span class="page-sub">{{ photos.length }} 张 · 点开可放大</span>
+    </header>
 
     <!-- Grid -->
     <div v-if="photos.length" class="photos-grid">
@@ -164,17 +165,16 @@ function handleImgError(filename: string) {
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
   margin-bottom: var(--space-2);
   break-inside: avoid;
-  transition: border-color var(--transition);
+  transition: border-color var(--dur-fast) var(--ease-standard);
 }
 
 .photo-thumb:hover {
-  border-color: var(--accent-border);
+  border-color: var(--border-strong);
 }
 
 .photo-thumb__blur {
@@ -203,13 +203,14 @@ function handleImgError(filename: string) {
   */
 }
 
+/* Flat ink panel, not a gradient — needle allows no gradients anywhere */
 .photo-thumb__overlay {
   position: absolute;
   inset: auto 0 0;
-  padding: var(--space-3) var(--space-3);
-  background: linear-gradient(transparent, rgba(0,0,0,0.6));
+  padding: var(--space-3);
+  background: rgba(20, 19, 16, 0.72);
   opacity: 0;
-  transition: opacity var(--transition);
+  transition: opacity var(--dur-base) var(--ease-standard);
   z-index: 2;
 }
 
@@ -218,9 +219,9 @@ function handleImgError(filename: string) {
 }
 
 .photo-thumb__title {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: #e8ddd0;
+  font-family: var(--font-sans);
+  font-size: var(--size-body-sm);
+  color: #F7F5F1;
 }
 
 /* ── Lightbox ──────────────────────── */
@@ -228,12 +229,12 @@ function handleImgError(filename: string) {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(0, 0, 0, 0.92);
+  background: var(--scrim);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-8);
-  animation: fade-in var(--transition);
+  animation: fade-in var(--dur-base) var(--ease-standard);
 }
 
 @keyframes fade-in {
@@ -253,29 +254,37 @@ function handleImgError(filename: string) {
   max-width: 100%;
   max-height: calc(90dvh - 60px);
   object-fit: contain;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
 }
 
+/*
+  The lightbox sits on ink in both themes, so its type is pinned to paper
+  rather than to the theme tokens.
+*/
 .lightbox__info {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--space-4);
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
+  width: 100%;
 }
 
 .lightbox__title {
-  color: #e4dbd0;
+  font-family: var(--font-sans);
+  font-size: var(--size-body-sm);
+  color: #F7F5F1;
 }
 
 .lightbox__date,
 .lightbox__counter {
-  color: rgba(228, 219, 208, 0.5);
+  font-family: var(--font-mono);
+  font-size: var(--size-caption);
+  letter-spacing: var(--tracking-wide);
+  color: rgba(247, 245, 241, 0.55);
+  font-variant-numeric: tabular-nums;
 }
 
 .lightbox__counter {
   margin-left: auto;
-  font-variant-numeric: tabular-nums;
 }
 
 /* Shared chrome for close / prev / next */
@@ -286,14 +295,15 @@ function handleImgError(filename: string) {
   justify-content: center;
   width: 44px;
   height: 44px;
-  color: rgba(228, 219, 208, 0.7);
-  border-radius: var(--radius-sm);
-  transition: color var(--transition), background var(--transition);
+  color: rgba(247, 245, 241, 0.7);
+  border-radius: var(--radius-md);
+  transition: color var(--dur-fast) var(--ease-standard),
+              background-color var(--dur-fast) var(--ease-standard);
 }
 
 .lightbox__btn:hover {
-  color: #e4dbd0;
-  background: rgba(255, 255, 255, 0.12);
+  color: #F7F5F1;
+  background: rgba(247, 245, 241, 0.12);
 }
 
 .lightbox__close {
@@ -311,12 +321,12 @@ function handleImgError(filename: string) {
 
 /* ── Empty ───────────────────────── */
 .empty-hint code {
-  font-family: var(--font-code);
-  padding: 1px 5px;
-  background: var(--code-bg);
-  border: 1px solid var(--code-border);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  padding: 2px 6px;
+  background: var(--bg-sunken);
   border-radius: var(--radius-sm);
-  color: var(--text-accent);
+  color: var(--text-strong);
 }
 
 /* Narrow screens: give the image the full width, drop the side arrows to the bottom */

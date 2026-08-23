@@ -15,49 +15,58 @@ const featuredProjects = projects.filter(p => p.featured).slice(0, 3)
 
 <template>
   <div class="container">
-    <!-- ── Profile ─────────────────────────────── -->
-    <section class="profile">
-      <div class="profile__avatar-wrap">
+    <!-- ── Hero ─────────────────────────────────────
+         The one place the display face runs at full size. -->
+    <section class="hero">
+      <div class="hero__text">
+        <p class="eyebrow hero__eyebrow">{{ siteConfig.title }}</p>
+        <h1 class="hero__name">
+          {{ siteConfig.name }}<span class="hero__dot" aria-hidden="true">.</span>
+        </h1>
+        <p class="hero__bio">{{ siteConfig.bio }}</p>
+      </div>
+
+      <div class="hero__avatar-wrap">
         <img
           v-if="siteConfig.avatar"
           :src="siteConfig.avatar"
           :alt="siteConfig.name"
-          class="profile__avatar"
-          width="72"
-          height="72"
+          class="hero__avatar"
+          width="96"
+          height="96"
           loading="eager"
         />
-        <div v-else class="profile__avatar-fallback" aria-hidden="true">
-          {{ siteConfig.name[0].toUpperCase() }}
-        </div>
-      </div>
-
-      <div class="profile__content">
-        <h1 class="profile__name">{{ siteConfig.name }}</h1>
-        <p class="profile__bio">{{ siteConfig.bio }}</p>
-        <p v-for="line in siteConfig.about" :key="line" class="profile__about">{{ line }}</p>
-        
-        <!-- ── 自定义内容：直接在这里写 ────────────── -->
-        <p class="profile__custom">
-          在 <RouterLink to="/blog" class="link">博客</RouterLink> 写文章，
-          在 <RouterLink to="/projects" class="link">项目</RouterLink> 放开发的东西，
-          在 <RouterLink to="/photos" class="link">照片</RouterLink> 记录拍过的画面。
-        </p>
-
-        <p class="profile__custom">
-          如需联系，邮箱是 <a :href="`mailto:${siteConfig.email}`" class="link">{{ siteConfig.email }}</a>，
-          要留言或查看其他人的留言 <RouterLink to="/guestbook" class="link">点这里</RouterLink>。
-        </p>
-
-        <div class="profile__interests">
-          <span v-for="item in siteConfig.interests" :key="item" class="tag">{{ item }}</span>
+        <div v-else class="hero__avatar hero__avatar--fallback" aria-hidden="true">
+          {{ siteConfig.name[0] }}
         </div>
       </div>
     </section>
 
-    <!-- ── Recent Posts ──────────────────────────── -->
+    <!-- ── About ───────────────────────────────────── -->
+    <section class="about">
+      <p v-for="line in siteConfig.about" :key="line" class="about__line">{{ line }}</p>
+
+      <p class="about__line about__line--spaced">
+        在 <RouterLink to="/blog" class="link">博客</RouterLink> 写文章，
+        在 <RouterLink to="/projects" class="link">项目</RouterLink> 放开发的东西，
+        在 <RouterLink to="/photos" class="link">照片</RouterLink> 记录拍过的画面。
+      </p>
+
+      <p class="about__line">
+        如需联系，邮箱是 <a :href="`mailto:${siteConfig.email}`" class="link">{{ siteConfig.email }}</a>，
+        要留言或查看其他人的留言 <RouterLink to="/guestbook" class="link">点这里</RouterLink>。
+      </p>
+
+      <div class="about__interests">
+        <span v-for="item in siteConfig.interests" :key="item" class="tag">{{ item }}</span>
+      </div>
+    </section>
+
+    <!-- ── Recent posts ────────────────────────────── -->
     <section>
-      <h2 class="section-rule">最近文章</h2>
+      <h2 class="section-rule">
+        <span class="section-rule__num">01</span>最近文章
+      </h2>
 
       <div v-if="recentPosts.length">
         <PostCard
@@ -67,17 +76,21 @@ const featuredProjects = projects.filter(p => p.featured).slice(0, 3)
           compact
         />
         <RouterLink v-if="allPosts.length > RECENT_LIMIT" to="/blog" class="text-btn view-all">
-          全部文章 ({{ allPosts.length }})
-          <Icon name="arrowRight" :size="12" />
+          全部文章
+          <span class="view-all__count">{{ allPosts.length }}</span>
+          <Icon name="arrowRight" :size="13" />
         </RouterLink>
       </div>
 
       <p v-else class="empty-hint">还没有文章，快去写一篇吧。</p>
     </section>
 
-    <!-- ── Projects ──────────────────────────────── -->
+    <!-- ── Projects ────────────────────────────────── -->
     <section v-if="featuredProjects.length">
-      <h2 class="section-rule">项目</h2>
+      <h2 class="section-rule">
+        <span class="section-rule__num">02</span>项目
+      </h2>
+
       <div class="project-list">
         <a
           v-for="project in featuredProjects"
@@ -91,7 +104,7 @@ const featuredProjects = projects.filter(p => p.featured).slice(0, 3)
             <span class="project-item__name">{{ project.name }}</span>
             <div class="project-item__links">
               <span v-if="project.wip" class="tag">WIP</span>
-              <Icon name="external" :size="12" />
+              <Icon name="external" :size="13" />
             </div>
           </div>
           <p class="project-item__desc">{{ project.description }}</p>
@@ -100,148 +113,164 @@ const featuredProjects = projects.filter(p => p.featured).slice(0, 3)
           </div>
         </a>
       </div>
+
       <RouterLink to="/projects" class="text-btn view-all">
         所有项目
-        <Icon name="arrowRight" :size="12" />
+        <Icon name="arrowRight" :size="13" />
       </RouterLink>
     </section>
   </div>
 </template>
 
 <style scoped>
-/* ── Profile ─────────────────────── */
-.profile {
+/* ── Hero ────────────────────────────────────────── */
+.hero {
   display: flex;
-  gap: var(--space-6);
   align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-8);
   padding-bottom: var(--space-10);
-  border-bottom: 1px solid var(--border-subtle);
-  margin-bottom: var(--space-2);
 }
 
-.profile__avatar-wrap {
-  flex-shrink: 0;
-}
-
-.profile__avatar {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--radius-md);
-  object-fit: cover;
-  border: 1px solid var(--border);
-}
-
-.profile__avatar-fallback {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-ui);
-  font-size: var(--text-xl);
-  font-weight: 600;
-  color: var(--text-tertiary);
-  background: var(--bg-elevated);
-}
-
-.profile__content {
-  flex: 1;
+.hero__text {
   min-width: 0;
 }
 
-.profile__name {
-  font-family: var(--font-ui);
-  font-size: var(--text-xl);
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-  margin-bottom: var(--space-2);
+.hero__eyebrow {
+  margin-bottom: var(--space-5);
 }
 
-.profile__bio {
-  font-size: var(--text-base);
-  color: var(--text-secondary);
-  margin-bottom: var(--space-3);
-  line-height: 1.6;
+.hero__name {
+  font-family: var(--font-display);
+  font-size: var(--size-display-xl);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
 }
 
-.profile__about {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  line-height: 1.7;
-  margin-bottom: var(--space-1);
+.hero__dot {
+  color: var(--text-faint);
 }
 
-.profile__interests {
+.hero__bio {
+  margin-top: var(--space-5);
+  font-family: var(--font-body);
+  font-size: var(--size-body-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--text-muted);
+  max-width: 44ch;
+}
+
+.hero__avatar-wrap {
+  flex-shrink: 0;
+}
+
+.hero__avatar {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.hero__avatar--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-sunken);
+  font-family: var(--font-display);
+  font-size: var(--size-display-md);
+  color: var(--text-muted);
+}
+
+/* ── About ───────────────────────────────────────── */
+.about {
+  padding-bottom: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-8);
+}
+
+.about__line {
+  font-family: var(--font-body);
+  font-size: var(--size-body-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--text-body);
+}
+
+.about__line--spaced {
+  margin-top: var(--space-5);
+}
+
+.about__interests {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-  margin-top: var(--space-4);
+  margin-top: var(--space-6);
 }
 
-.profile__custom {
-  margin-top: var(--space-5);
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  line-height: 1.7;
-}
-
+/* ── View-all link ───────────────────────────────── */
 .view-all {
-  margin-top: var(--space-4);
+  margin-top: var(--space-6);
 }
 
-/* ── Projects ──────────────────────── */
+.view-all__count {
+  font-family: var(--font-mono);
+  font-size: var(--size-caption);
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Projects ────────────────────────────────────── */
 .project-list {
   display: grid;
   gap: var(--space-3);
 }
 
+/* Hairline card, flat by default — elevation is a border, not a shadow */
 .project-item {
   display: block;
-  padding: var(--space-4) var(--space-5);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  transition: border-color var(--transition), background var(--transition);
+  padding: var(--space-5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  transition: var(--motion-hover);
 }
 
 .project-item:hover {
-  border-color: var(--accent-border);
-  background: var(--bg-hover);
+  background: var(--bg-sunken);
+  border-color: var(--border-strong);
 }
 
 .project-item__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-3);
   margin-bottom: var(--space-2);
 }
 
 .project-item__name {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.project-item:hover .project-item__name {
-  color: var(--text-accent);
+  font-family: var(--font-sans);
+  font-size: var(--size-body-lg);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
 }
 
 .project-item__links {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--text-tertiary);
+  color: var(--text-faint);
 }
 
 .project-item__desc {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--size-body-sm);
+  color: var(--text-muted);
+  line-height: var(--leading-normal);
+  margin-bottom: var(--space-4);
 }
 
 .project-item__tech {
@@ -250,11 +279,17 @@ const featuredProjects = projects.filter(p => p.featured).slice(0, 3)
   gap: var(--space-2);
 }
 
-/* ── Mobile ──────────────────────── */
-@media (max-width: 520px) {
-  .profile {
-    flex-direction: column;
-    gap: var(--space-4);
+/* ── Narrow screens ──────────────────────────────── */
+@media (max-width: 560px) {
+  .hero {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: var(--space-6);
+  }
+
+  .hero__avatar {
+    width: 72px;
+    height: 72px;
   }
 }
 </style>

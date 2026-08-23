@@ -19,6 +19,7 @@ function goTag(e: MouseEvent, tag: string) {
 
 <template>
   <RouterLink :to="`/blog/${post.slug}`" class="post-card" :class="{ 'post-card--compact': compact }">
+    <!-- Dates are numbers, and needle sets numbers in mono -->
     <time :datetime="post.date" class="post-card__date">{{ formatDateShort(post.date) }}</time>
     <div class="post-card__body">
       <h3 class="post-card__title">{{ post.title }}</h3>
@@ -38,29 +39,36 @@ function goTag(e: MouseEvent, tag: string) {
 <style scoped>
 .post-card {
   display: grid;
-  grid-template-columns: 90px 1fr;
-  gap: var(--space-4);
+  grid-template-columns: 96px 1fr;
+  gap: var(--space-5);
   align-items: start;
-  padding: var(--space-4) 0;
+  padding: var(--space-4);
+  /* Pull the hover fill out past the text so the row reads as one target */
+  margin: 0 calc(var(--space-4) * -1);
+  border-radius: var(--radius-md);
   border-bottom: 1px solid var(--border-subtle);
-  cursor: pointer;
+  transition: var(--motion-hover);
 }
 
-.post-card:first-child {
-  border-top: 1px solid var(--border-subtle);
+.post-card:hover {
+  background: var(--bg-sunken);
+  border-bottom-color: transparent;
 }
 
-/* Colour shift on the title is the whole hover affordance — no sliding arrow. */
-.post-card:hover .post-card__title {
-  color: var(--text-accent);
+.post-card:hover .post-card__title,
+.post-card:hover .post-card__date {
+  color: var(--text-strong);
 }
 
 .post-card__date {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  padding-top: 3px;
+  font-family: var(--font-mono);
+  font-size: var(--size-caption);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  padding-top: 4px;
   white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease-standard);
 }
 
 .post-card__body {
@@ -68,19 +76,20 @@ function goTag(e: MouseEvent, tag: string) {
 }
 
 .post-card__title {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-primary);
-  line-height: 1.4;
-  transition: color var(--transition);
-  margin-bottom: var(--space-1);
+  font-family: var(--font-sans);
+  font-size: var(--size-body-lg);
+  font-weight: var(--weight-medium);
+  color: var(--text-body);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  transition: color var(--dur-fast) var(--ease-standard);
 }
 
 .post-card__desc {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  line-height: 1.6;
+  font-family: var(--font-sans);
+  font-size: var(--size-body-sm);
+  color: var(--text-muted);
+  line-height: var(--leading-normal);
   margin-top: var(--space-2);
   overflow: hidden;
   display: -webkit-box;
@@ -97,14 +106,19 @@ function goTag(e: MouseEvent, tag: string) {
 
 /* Compact variant (homepage) */
 .post-card--compact {
-  padding: var(--space-3) 0;
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
 }
 
-/* Narrow screens: the fixed 90px date column squeezes titles — stack instead */
+/* Narrow screens: the fixed date column squeezes titles — stack instead */
 @media (max-width: 520px) {
   .post-card {
     grid-template-columns: 1fr;
-    gap: var(--space-1);
+    gap: var(--space-2);
+  }
+
+  .post-card__date {
+    padding-top: 0;
   }
 }
 </style>

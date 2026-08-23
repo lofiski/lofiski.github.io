@@ -134,15 +134,15 @@ onBeforeUnmount(() => clearTimeout(resetTimer))
     <!-- Not found -->
     <div v-else-if="notFound" class="not-found">
       <p class="not-found__msg">文章不存在。</p>
-      <button class="text-btn" @click="goBlog">← 返回 Blog</button>
+      <button class="text-btn" @click="goBlog">← 返回文章列表</button>
     </div>
 
     <!-- Post -->
     <article v-else class="post">
-      <!-- Header -->
+      <!-- Header: the article title is a hero moment, so it takes the display face -->
       <header class="post__header">
         <div class="post__meta">
-          <button class="text-btn" @click="goBlog" aria-label="返回文章列表">
+          <button class="text-btn" aria-label="返回文章列表" @click="goBlog">
             ← Blog
           </button>
           <time v-if="frontmatter?.date" :datetime="frontmatter.date" class="post__date">
@@ -187,17 +187,18 @@ onBeforeUnmount(() => clearTimeout(resetTimer))
 }
 
 .not-found {
-  padding: var(--space-16) 0;
+  padding: var(--space-20) 0;
   text-align: center;
 }
 
 .not-found__msg {
-  font-family: var(--font-ui);
-  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+  font-size: var(--size-body);
+  color: var(--text-muted);
   margin-bottom: var(--space-4);
 }
 
-/* ── Post Header ─────────────────── */
+/* ── Post header ─────────────────── */
 .post__header {
   margin-bottom: var(--space-8);
 }
@@ -206,30 +207,35 @@ onBeforeUnmount(() => clearTimeout(resetTimer))
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-6);
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
 }
 
 .post__date {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--size-caption);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
 }
 
 .post__title {
-  font-family: var(--font-ui);
-  font-size: var(--text-3xl);
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-  line-height: 1.25;
-  margin-bottom: var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--size-display-md);
+  font-weight: var(--weight-medium);
+  color: var(--text-strong);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-snug);
+  margin-bottom: var(--space-5);
 }
 
 .post__description {
-  font-size: var(--text-lg);
-  color: var(--text-secondary);
-  line-height: 1.65;
-  margin-bottom: var(--space-4);
+  font-family: var(--font-sans);
+  font-size: var(--size-body-lg);
+  color: var(--text-muted);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-5);
+  max-width: 52ch;
 }
 
 .post__tags {
@@ -240,25 +246,18 @@ onBeforeUnmount(() => clearTimeout(resetTimer))
 
 .post__divider {
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-subtle);
   margin: var(--space-8) 0;
 }
 
-/* ── Post Content ────────────────── */
+/* ── Post content ────────────────── */
 .post__content {
   margin-bottom: var(--space-16);
 }
 
-/* ── Post Footer ─────────────────── */
+/* ── Post footer ─────────────────── */
 .post__footer {
   padding-top: var(--space-8);
   border-top: 1px solid var(--border-subtle);
-}
-
-/* Mobile */
-@media (max-width: 520px) {
-  .post__title {
-    font-size: var(--text-2xl);
-  }
 }
 </style>

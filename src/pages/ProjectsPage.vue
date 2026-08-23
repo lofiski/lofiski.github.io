@@ -10,13 +10,15 @@ function projectUrl(project: Project) {
 
 <template>
   <div class="container">
-    <h1 class="page-title">项目</h1>
-    <p class="page-sub">我做过的一些东西。</p>
-
+    <header class="page-header">
+      <p class="eyebrow">projects</p>
+      <h1 class="page-title">项目</h1>
+      <span class="page-sub">{{ projects.length }} 个 · 我做过的一些东西</span>
+    </header>
 
     <div v-if="projects.length" class="projects-grid">
       <article
-        v-for="project in projects"
+        v-for="(project, index) in projects"
         :key="project.name"
         class="project-card"
       >
@@ -33,6 +35,10 @@ function projectUrl(project: Project) {
         <!-- Body -->
         <div class="project-card__body">
           <div class="project-card__header">
+            <!-- A display numeral indexes the card — the system's scale-contrast device -->
+            <span class="project-card__index" aria-hidden="true">
+              {{ String(index + 1).padStart(2, '0') }}
+            </span>
             <h2 class="project-card__name">{{ project.name }}</h2>
             <span v-if="project.wip" class="tag">WIP</span>
           </div>
@@ -57,8 +63,8 @@ function projectUrl(project: Project) {
             rel="noopener noreferrer"
             class="project-link project-link--primary"
           >
-            <Icon name="external" :size="12" />
             访问
+            <Icon name="external" :size="13" />
           </a>
           <a
             v-if="project.github"
@@ -67,7 +73,7 @@ function projectUrl(project: Project) {
             rel="noopener noreferrer"
             class="project-link"
           >
-            <Icon name="github" :size="12" />
+            <Icon name="github" :size="13" />
             GitHub
           </a>
         </footer>
@@ -79,38 +85,31 @@ function projectUrl(project: Project) {
 </template>
 
 <style scoped>
-.page-title {
-  margin-bottom: var(--space-2);
-}
-
-.page-sub {
-  display: block;
-  margin-bottom: var(--space-10);
-}
-
 .projects-grid {
   display: grid;
   gap: var(--space-4);
 }
 
+/* Hairline card, flat by default. Elevation is a border first, shadow second. */
 .project-card {
   display: flex;
   flex-direction: column;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: border-color var(--transition);
+  transition: border-color var(--dur-fast) var(--ease-standard);
 }
 
 .project-card:hover {
-  border-color: var(--accent-border);
+  border-color: var(--border-strong);
 }
 
 .project-card__img-wrap {
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: var(--bg);
+  background: var(--bg-sunken);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .project-card__img {
@@ -126,32 +125,42 @@ function projectUrl(project: Project) {
 
 .project-card__header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: baseline;
   gap: var(--space-3);
   margin-bottom: var(--space-3);
 }
 
+.project-card__index {
+  font-family: var(--font-display);
+  font-size: var(--size-body-lg);
+  color: var(--text-faint);
+  font-variant-numeric: lining-nums;
+  flex-shrink: 0;
+}
+
 .project-card__name {
-  font-family: var(--font-ui);
-  font-size: var(--text-base);
-  font-weight: 600;
-  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--size-h3);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
+  margin-right: auto;
 }
 
 .project-card__desc {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  line-height: 1.65;
+  font-family: var(--font-sans);
+  font-size: var(--size-body);
+  color: var(--text-body);
+  line-height: var(--leading-relaxed);
   margin-bottom: var(--space-3);
 }
 
 .project-card__long-desc {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  line-height: 1.65;
-  margin-bottom: var(--space-3);
-  opacity: 0.8;
+  font-family: var(--font-sans);
+  font-size: var(--size-body-sm);
+  color: var(--text-muted);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-4);
 }
 
 .project-card__tech {
@@ -165,35 +174,40 @@ function projectUrl(project: Project) {
   gap: var(--space-2);
   padding: var(--space-4) var(--space-5);
   border-top: 1px solid var(--border-subtle);
+  background: var(--bg-app);
 }
 
 .project-link {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
-  transition: color var(--transition), border-color var(--transition), background var(--transition);
+  height: 32px;
+  padding: 0 var(--space-4);
+  font-family: var(--font-sans);
+  font-size: var(--size-body-sm);
+  font-weight: var(--weight-medium);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  color: var(--text-strong);
+  transition: var(--motion-hover);
 }
 
 .project-link:hover {
-  color: var(--text-primary);
-  border-color: var(--accent-border);
-  background: var(--accent-subtle);
+  background: var(--bg-sunken);
+  border-color: var(--stone);
 }
 
+/* Primary is an ink fill — the only "accent" the system has */
 .project-link--primary {
-  background: var(--accent-subtle);
-  border-color: var(--accent-border);
-  color: var(--text-accent);
+  background: var(--action-primary-bg);
+  border-color: var(--action-primary-bg);
+  color: var(--action-primary-fg);
 }
 
 .project-link--primary:hover {
-  background: var(--bg-hover);
+  background: var(--action-primary-hover);
+  border-color: var(--action-primary-hover);
+  color: var(--action-primary-fg);
 }
 
 @media (min-width: 640px) {

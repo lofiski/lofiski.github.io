@@ -120,17 +120,20 @@ onUnmounted(() => {
 
 <template>
   <div class="container">
-    <div class="page-header">
+    <header class="page-header">
+      <p class="eyebrow">guestbook</p>
       <h1 class="page-title">留言板</h1>
-      <span v-if="!loading" class="page-count">{{ messages.length }} 条</span>
-    </div>
+      <span v-if="!loading" class="page-sub">{{ messages.length }} 条 · 说点什么都行</span>
+    </header>
 
     <!-- 留言表单 -->
     <section class="form-section">
-      <h2 class="section-rule">留下留言</h2>
+      <h2 class="section-rule">
+        <span class="section-rule__num">01</span>留下留言
+      </h2>
       <form class="guestbook-form" novalidate @submit.prevent="handleSubmit">
         <div class="form-row">
-          <label class="form-label" for="gb-nickname">昵称</label>
+          <label class="eyebrow form-label" for="gb-nickname">昵称</label>
           <input
             id="gb-nickname"
             v-model="nickname"
@@ -142,7 +145,7 @@ onUnmounted(() => {
           />
         </div>
         <div class="form-row">
-          <label class="form-label" for="gb-content">留言内容</label>
+          <label class="eyebrow form-label" for="gb-content">留言内容</label>
           <textarea
             id="gb-content"
             v-model="content"
@@ -166,7 +169,7 @@ onUnmounted(() => {
           <p v-if="submitError" class="form-msg form-msg--error">{{ submitError }}</p>
           <p v-else-if="submitSuccess" class="form-msg form-msg--ok">留言成功！</p>
           <span v-else />
-          <button type="submit" class="submit-btn" :disabled="submitting">
+          <button type="submit" class="btn" :disabled="submitting">
             {{ submitting ? '提交中…' : '提交留言' }}
           </button>
         </div>
@@ -175,7 +178,9 @@ onUnmounted(() => {
 
     <!-- 留言列表 -->
     <section>
-      <h2 class="section-rule">所有留言</h2>
+      <h2 class="section-rule">
+        <span class="section-rule__num">02</span>所有留言
+      </h2>
 
       <div v-if="loading" class="state-hint">加载中…</div>
       <div v-else-if="fetchError" class="state-hint state-hint--error">{{ fetchError }}</div>
@@ -215,18 +220,15 @@ onUnmounted(() => {
 }
 
 .form-label {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--text-muted);
 }
 
 .char-count {
   align-self: flex-end;
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--size-caption);
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
 }
 
 .honeypot {
@@ -247,35 +249,12 @@ onUnmounted(() => {
 }
 
 .form-msg {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
+  font-family: var(--font-sans);
+  font-size: var(--size-body-sm);
 }
 
-.form-msg--error { color: var(--danger); }
-.form-msg--ok    { color: var(--text-accent); }
-
-.submit-btn {
-  padding: var(--space-2) var(--space-5);
-  background: var(--accent-subtle);
-  border: 1px solid var(--accent-border);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  color: var(--text-accent);
-  cursor: pointer;
-  transition: background var(--transition), border-color var(--transition), color var(--transition);
-}
-
-.submit-btn:hover:not(:disabled) {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--text-invert);
-}
-
-.submit-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.form-msg--error { color: var(--critical); }
+.form-msg--ok    { color: var(--positive); }
 
 /* ── Messages ───────────────────── */
 .message-list {
@@ -285,15 +264,15 @@ onUnmounted(() => {
 }
 
 .message-card {
-  padding: var(--space-4) var(--space-5);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  transition: border-color var(--transition);
+  padding: var(--space-5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--dur-fast) var(--ease-standard);
 }
 
 .message-card:hover {
-  border-color: var(--accent-border);
+  border-color: var(--border-strong);
 }
 
 .message-header {
@@ -305,23 +284,27 @@ onUnmounted(() => {
 }
 
 .message-nick {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-accent);
+  font-family: var(--font-sans);
+  font-size: var(--size-body);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
 }
 
 .message-time {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--size-caption);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
   flex-shrink: 0;
 }
 
 .message-content {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  line-height: 1.7;
+  font-family: var(--font-body);
+  font-size: var(--size-body-lg);
+  color: var(--text-body);
+  line-height: var(--leading-relaxed);
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -334,21 +317,22 @@ onUnmounted(() => {
 
 .state-hint {
   display: block;
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+  font-size: var(--size-body-sm);
+  color: var(--text-faint);
   padding: var(--space-12) 0;
   text-align: center;
 }
 
-.state-hint--error { color: var(--danger); }
+.state-hint--error { color: var(--critical); }
 
 .end-hint {
   display: block;
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+  font-size: var(--size-caption);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-faint);
   text-align: center;
-  letter-spacing: 0.1em;
 }
 </style>

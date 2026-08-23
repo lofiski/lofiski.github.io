@@ -12,7 +12,8 @@ import { siteConfig } from './src/config/site'
 
 export default defineConfig(async () => {
   const highlighter = await createHighlighter({
-    themes: ['github-dark-dimmed', 'github-light'],
+    // Warm, low-saturation themes — a cool grey/blue palette fights needle's paper
+    themes: ['vitesse-dark', 'vitesse-light'],
     langs: [
       'javascript', 'typescript', 'vue', 'html', 'css', 'scss',
       'json', 'bash', 'shell', 'python', 'rust', 'go', 'markdown',
@@ -80,8 +81,8 @@ export default defineConfig(async () => {
         markdownItSetup(md) {
           md.use(fromHighlighter(highlighter, {
             themes: {
-              dark: 'github-dark-dimmed',
-              light: 'github-light',
+              dark: 'vitesse-dark',
+              light: 'vitesse-light',
             },
             defaultColor: false,
           }))

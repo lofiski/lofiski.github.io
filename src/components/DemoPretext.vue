@@ -37,6 +37,18 @@
 <script setup>
 import { ref, watch, onMounted, nextTick } from 'vue'
 import { prepareWithSegments, layoutNextLine } from '@chenglou/pretext'
+import { useTheme } from '@/composables/useTheme'
+
+const { theme } = useTheme()
+
+/*
+ * The canvas can't inherit CSS custom properties, so the needle tokens are read
+ * off <html> at draw time and the whole thing is redrawn when the theme flips.
+ */
+function token(name, fallback) {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  return v || fallback
+}
 
 const canvasRef = ref(null)
 const imgW = ref(160)
@@ -108,8 +120,7 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 
   // 背景
-  ctx.fillStyle = getComputedStyle(document.documentElement)
-    .getPropertyValue('--bg') || '#faf9f6'
+  ctx.fillStyle = token('--paper-pure', '#FFFFFF')
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   // 画图片
@@ -121,16 +132,16 @@ function draw() {
     ctx.drawImage(img, PADDING, PADDING, iw, ih)
     ctx.restore()
     // 图片边框
-    ctx.strokeStyle = '#d4c9b0'
+    ctx.strokeStyle = token('--sand-line', '#CFC8B9')
     ctx.lineWidth = 1
     roundRect(ctx, PADDING, PADDING, iw, ih, 8)
     ctx.stroke()
   } else {
     // 占位框
-    ctx.fillStyle = '#e8e3d8'
+    ctx.fillStyle = token('--sand', '#E8E4DC')
     roundRect(ctx, PADDING, PADDING, iw, ih, 8)
     ctx.fill()
-    ctx.fillStyle = '#a09880'
+    ctx.fillStyle = token('--stone-light', '#9A9384')
     ctx.font = '14px serif'
     ctx.textAlign = 'center'
     ctx.fillText('图片加载中…', PADDING + iw / 2, PADDING + ih / 2)
@@ -138,7 +149,7 @@ function draw() {
   }
 
   // 画文字
-  ctx.fillStyle = '#2c2416'
+  ctx.fillStyle = token('--ink-soft', '#3A362D')
   ctx.font = font
   ctx.textBaseline = 'top'
   for (const line of lines) {
@@ -147,7 +158,7 @@ function draw() {
 
   // 标注线（可选，展示图片边界）
   ctx.setLineDash([4, 4])
-  ctx.strokeStyle = '#c8bfa8'
+  ctx.strokeStyle = token('--line-strong', '#C7BFAF')
   ctx.lineWidth = 1
   ctx.beginPath()
   ctx.moveTo(PADDING, PADDING + ih)
@@ -176,77 +187,80 @@ onMounted(async () => {
   draw()
 })
 
-watch([imgW, imgH, fontSize, lineHeight], () => {
+watch([imgW, imgH, fontSize, lineHeight, theme], () => {
   draw()
 })
 </script>
 
 <style scoped>
 .wrap-demo {
-  font-family: 'Georgia', serif;
+  font-family: var(--font-sans);
   max-width: 780px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-  color: #2c2416;
+  margin: var(--space-8) auto;
+  color: var(--text-body);
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: var(--size-h2);
+  font-weight: var(--weight-medium);
+  color: var(--text-strong);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-2);
 }
 
 .subtitle {
-  color: #7a6e5a;
-  margin-bottom: 1.5rem;
-  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-6);
+  font-size: var(--size-body-sm);
 }
 
 code {
-  background: #f0ece3;
-  padding: 0.1em 0.4em;
-  border-radius: 4px;
-  font-family: monospace;
+  background: var(--bg-sunken);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
   font-size: 0.85em;
+  color: var(--text-strong);
 }
 
 .controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1.5rem;
-  background: #f5f1e8;
-  border: 1px solid #e0d9cb;
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.25rem;
+  gap: var(--space-3) var(--space-6);
+  background: var(--bg-sunken);
+  border: 1px solid var(--border-sunken);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-5);
 }
 
 .controls label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #5a5040;
+  gap: var(--space-2);
+  font-size: var(--size-body-sm);
+  color: var(--text-body);
 }
 
 .controls input[type="range"] {
   width: 110px;
-  accent-color: #8b6f47;
+  accent-color: var(--ink);
 }
 
 .controls span {
-  min-width: 40px;
+  min-width: 44px;
+  font-family: var(--font-mono);
+  font-size: var(--size-caption);
   font-variant-numeric: tabular-nums;
-  color: #8b6f47;
-  font-weight: 600;
+  color: var(--text-strong);
 }
 
 .canvas-wrapper {
-  border: 1px solid #e0d9cb;
-  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  background: #faf9f6;
+  background: var(--bg-surface);
 }
 
 canvas {
@@ -255,9 +269,11 @@ canvas {
 }
 
 .note {
-  font-size: 0.8rem;
-  color: #a09880;
-  margin-top: 0.75rem;
+  font-family: var(--font-sans);
+  font-size: var(--size-caption);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-faint);
+  margin-top: var(--space-3);
   text-align: center;
 }
 </style>1

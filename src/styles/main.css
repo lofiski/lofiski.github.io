@@ -1,109 +1,193 @@
-/* ─────────────────────────────────────────────
-   Design Tokens
-───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   needle — design tokens
+   ---------------------------------------------------------------
+   Warm, near-monochrome, restrained. The personality is carried by
+   TYPE, not colour: Bodoni Moda (sharp didone display) set against
+   Space Grotesk (technical grotesque), with Space Mono for numbers.
+   There is deliberately no brand hue — the accent IS ink.
+
+   CJK note: the Latin faces carry no Chinese glyphs, so each stack
+   falls through per-glyph — Noto Serif SC takes the display + body
+   role, the system UI face takes the grotesque role.
+   ═══════════════════════════════════════════════════════════════ */
+
 :root {
-  /* Dark theme (default) */
-  --bg:            #0d0d0d;
-  --bg-elevated:   #141210;
-  --bg-hover:      #1c1916;
-  --border:        #2a2520;
-  --border-subtle: #1e1c18;
+  /* ── Neutral ramp (warm greige) ─────────────────────────────── */
+  --paper:       #F7F5F1;   /* app background, warm white */
+  --paper-pure:  #FFFFFF;   /* raised surfaces on paper */
+  --sand:        #E8E4DC;   /* SIGNATURE surface — the brand tone */
+  --sand-deep:   #DAD4C8;   /* pressed / nested sand */
+  --sand-line:   #CFC8B9;   /* hairline on sand */
+  --ink:         #141310;   /* warm near-black — text & primary action */
+  --ink-soft:    #3A362D;   /* strong secondary text */
+  --stone:       #6E685B;   /* muted secondary text / icons */
+  --stone-light: #9A9384;   /* tertiary text, placeholders */
+  --line:        #DED8CC;   /* default hairline on paper */
+  --line-strong: #C7BFAF;   /* emphasised border */
 
-  --text-primary:   #e4dbd0;
-  --text-secondary: #8a7f72;
-  --text-tertiary:  #5a524a;
-  --text-accent:    #c89a50;
-  --text-accent-hover: #d4aa64;
-  --text-invert:    #0d0d0d;
+  /* ── Muted semantics (warm — they must never break the calm) ── */
+  --positive: #4F6B45;  --positive-surface: #E7ECE1;
+  --caution:  #A9791F;  --caution-surface:  #F3EAD5;
+  --critical: #A23C2B;  --critical-surface: #F1E0DB;
+  --info:     #3E4C5B;  --info-surface:     #E4E7EA;
 
-  --accent:         #c89a50;
-  --accent-subtle:  rgba(200, 154, 80, 0.12);
-  --accent-border:  rgba(200, 154, 80, 0.3);
+  /* ── Semantic aliases — components use ONLY these ───────────── */
+  --bg-app:     var(--paper);
+  --bg-surface: var(--paper-pure);
+  --bg-sunken:  var(--sand);
+  --bg-pressed: var(--sand-deep);
+  --bg-brand:   var(--ink);
 
-  --tag-bg:         rgba(200, 154, 80, 0.1);
-  --tag-text:       #c89a50;
-  --tag-border:     rgba(200, 154, 80, 0.25);
+  --text-strong: var(--ink);
+  --text-body:   var(--ink-soft);
+  --text-muted:  var(--stone);
+  --text-faint:  var(--stone-light);
+  --text-on-ink: var(--paper);
 
-  --code-bg:        #131110;
-  --code-border:    #242018;
+  --border-subtle: var(--line);
+  --border-strong: var(--line-strong);
+  --border-sunken: var(--sand-line);
 
-  --danger:         #e07070;
+  --action-primary-bg:    var(--ink);
+  --action-primary-fg:    var(--paper);
+  --action-primary-hover: #2A261E;
+  --focus-ring: rgba(20, 19, 16, 0.35);
 
-  /* Typography */
-  --font-ui:   'IBM Plex Mono', 'Courier New', monospace;
-  --font-body: 'Noto Serif SC', 'Songti SC', 'SimSun', Georgia, serif;
-  --font-code: 'JetBrains Mono', 'Fira Code', 'IBM Plex Mono', monospace;
+  --scrim: rgba(20, 19, 16, 0.92);
 
-  /* Scale */
-  --text-xs:   0.75rem;
-  --text-sm:   0.875rem;
-  --text-base: 1rem;
-  --text-lg:   1.125rem;
-  --text-xl:   1.25rem;
-  --text-2xl:  1.5rem;
-  --text-3xl:  1.875rem;
+  /* ── Type ───────────────────────────────────────────────────── */
+  --font-display: "Bodoni Moda", "Noto Serif SC", "Songti SC", "SimSun", serif;
+  --font-sans:    "Space Grotesk", "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
+  --font-body:    "Noto Serif SC", "Songti SC", "SimSun", Georgia, serif;
+  --font-mono:    "Space Mono", ui-monospace, "SFMono-Regular", monospace;
 
-  /* Spacing (8pt grid) */
-  --space-1:  0.25rem;
-  --space-2:  0.5rem;
-  --space-3:  0.75rem;
-  --space-4:  1rem;
-  --space-5:  1.25rem;
-  --space-6:  1.5rem;
-  --space-8:  2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  --space-20: 5rem;
+  /* 1.25 major-third, tuned */
+  --size-display-xl: 88px;
+  --size-display-lg: 64px;
+  --size-display-md: 44px;
+  --size-h1:      34px;
+  --size-h2:      26px;
+  --size-h3:      20px;
+  --size-body-lg: 17px;
+  --size-body:    15px;
+  --size-body-sm: 13px;
+  --size-caption: 11px;
 
-  /* Layout */
-  --max-w-content: 720px;
-  --max-w-wide:    960px;
-  --nav-h:         56px;
+  --leading-tight:   1.05;
+  --leading-snug:    1.2;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.65;
 
-  /* Radius */
-  --radius-sm: 2px;
-  --radius-md: 4px;
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
 
-  /* Transition — one duration everywhere, short enough to feel instant */
-  --transition: 120ms ease;
+  --tracking-tight:  -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.02em;
+  --tracking-caps:   0.14em;   /* eyebrows / overlines */
+
+  /* ── Spacing (4px base) ─────────────────────────────────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  /* ── Layout ─────────────────────────────────────────────────── */
+  --container-narrow: 720px;
+  --container-max:    960px;
+  --gutter:  var(--space-6);
+  --nav-h:   56px;
+  --control-height: 40px;
+
+  /* ── Radii — sharp, to echo "needle" precision ──────────────── */
+  --radius-sm:   2px;   /* chips / badges */
+  --radius-md:   4px;   /* controls */
+  --radius-lg:   8px;   /* cards */
+  --radius-pill: 999px;
+
+  /* ── Shadows — barely there, warm-tinted. Hairline first. ───── */
+  --shadow-xs: 0 1px 2px rgba(20, 19, 16, 0.04);
+  --shadow-sm: 0 1px 3px rgba(20, 19, 16, 0.06), 0 1px 2px rgba(20, 19, 16, 0.04);
+  --shadow-md: 0 4px 16px rgba(20, 19, 16, 0.07), 0 1px 3px rgba(20, 19, 16, 0.05);
+  --shadow-lg: 0 16px 48px rgba(20, 19, 16, 0.10), 0 2px 8px rgba(20, 19, 16, 0.06);
+
+  /* ── Motion — quiet and precise. No bounce, no spring. ──────── */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 280ms;
+  /*
+    The motion budget from the previous system still binds: transition
+    colour, background, border and opacity only. Never width/height, never
+    a hover transform, no backdrop-filter — those were the measured sources
+    of scroll and navigation jank here, and needle's "quiet, precise" motion
+    brief is satisfied without them.
+  */
+  --motion-hover: color var(--dur-fast) var(--ease-standard),
+                  background-color var(--dur-fast) var(--ease-standard),
+                  border-color var(--dur-fast) var(--ease-standard);
+
+  color-scheme: light;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Ink mode
+   ---------------------------------------------------------------
+   needle ships no dark specimen, so this inverts the ramp along the
+   same warm axis: ink becomes the ground, paper becomes the mark,
+   and "sand" survives as the raised warm surface. Semantics lift just
+   enough to stay legible while staying muted.
+   ═══════════════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  --paper:       #131210;
+  --paper-pure:  #1A1815;
+  --sand:        #221F1A;
+  --sand-deep:   #2B2721;
+  --sand-line:   #3A342B;
+  --ink:         #F2EEE7;
+  --ink-soft:    #D6D0C4;
+  --stone:       #9A9384;
+  --stone-light: #6E685B;
+  --line:        #2A2620;
+  --line-strong: #3D382F;
+
+  --positive: #8FA981;  --positive-surface: #23291F;
+  --caution:  #C9A055;  --caution-surface:  #2C2617;
+  --critical: #D08471;  --critical-surface: #2E1F1B;
+  --info:     #93A4B5;  --info-surface:     #1D2226;
+
+  --text-on-ink: var(--paper);
+
+  --action-primary-bg:    var(--ink);
+  --action-primary-fg:    #131210;
+  --action-primary-hover: #FFFFFF;
+  --focus-ring: rgba(242, 238, 231, 0.4);
+
+  --scrim: rgba(9, 8, 7, 0.94);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.35);
 
   color-scheme: dark;
 }
 
-[data-theme="light"] {
-  color-scheme: light;
-
-  --bg:            #f5f0e8;
-  --bg-elevated:   #ede8de;
-  --bg-hover:      #e6e0d6;
-  --border:        #d0c8b8;
-  --border-subtle: #ddd8ce;
-
-  --text-primary:   #1a1510;
-  --text-secondary: #6a6050;
-  --text-tertiary:  #9a9080;
-  --text-accent:    #8b5e28;
-  --text-accent-hover: #7a5020;
-  --text-invert:    #f5f0e8;
-
-  --accent:         #8b5e28;
-  --accent-subtle:  rgba(139, 94, 40, 0.08);
-  --accent-border:  rgba(139, 94, 40, 0.25);
-
-  --tag-bg:         rgba(139, 94, 40, 0.08);
-  --tag-text:       #8b5e28;
-  --tag-border:     rgba(139, 94, 40, 0.2);
-
-  --code-bg:        #ede8de;
-  --code-border:    #d0c8b8;
-
-  --danger:         #b03535;
-}
-
-/* ─────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════════
    Reset
-───────────────────────────────────────────── */
+   ═══════════════════════════════════════════════════════════════ */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -113,23 +197,23 @@
 html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
-  scrollbar-color: var(--border) transparent;
+  scrollbar-color: var(--border-strong) transparent;
   scrollbar-width: thin;
   /* Anchor jumps must clear the sticky navbar */
   scroll-padding-top: calc(var(--nav-h) + var(--space-4));
 }
 
-/* Set while a modal (photo lightbox) is open */
+/* Set while the photo lightbox is open */
 html.is-locked, html.is-locked body {
   overflow: hidden;
 }
 
 body {
   font-family: var(--font-body);
-  font-size: var(--text-base);
-  line-height: 1.75;
-  color: var(--text-primary);
-  background: var(--bg);
+  font-size: var(--size-body-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--text-body);
+  background: var(--bg-app);
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -161,215 +245,325 @@ ul, ol {
   list-style: none;
 }
 
-/* ─────────────────────────────────────────────
-   Layout Utilities
-───────────────────────────────────────────── */
+::selection {
+  background: var(--sand-deep);
+  color: var(--text-strong);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Layout
+   ═══════════════════════════════════════════════════════════════ */
 .container {
   width: 100%;
-  max-width: var(--max-w-content);
+  max-width: var(--container-narrow);
   margin: 0 auto;
-  padding: 0 var(--space-6);
+  padding: 0 var(--gutter);
 }
 
 .container--wide {
-  max-width: var(--max-w-wide);
+  max-width: var(--container-max);
 }
 
-/* ─────────────────────────────────────────────
-   Page chrome (shared by Blog / Photos / Projects / Guestbook)
-───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   Type primitives
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Eyebrow / overline — uppercase grotesque, the system's label voice */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--size-caption);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+/* Numbers are concrete and set in mono: dates, counts, indexes */
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--size-caption);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Page chrome — shared by Blog / Photos / Projects / Guestbook
+   ═══════════════════════════════════════════════════════════════ */
 .page-header {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-10);
+}
+
+.page-header .eyebrow {
+  display: block;
+  margin-bottom: var(--space-4);
 }
 
 .page-title {
-  font-family: var(--font-ui);
-  font-size: var(--text-2xl);
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: var(--size-display-md);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-strong);
 }
 
-.page-count,
 .page-sub {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  display: block;
+  margin-top: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--size-body-sm);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .empty-hint {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-  padding: var(--space-12) 0;
+  font-family: var(--font-sans);
+  font-size: var(--size-body-sm);
+  color: var(--text-faint);
+  padding: var(--space-16) 0;
   text-align: center;
-  line-height: 1.8;
+  line-height: var(--leading-relaxed);
 }
 
-/* ─────────────────────────────────────────────
-   Form controls
-───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   Section rule — a display numeral, an eyebrow, and a hairline
+   ═══════════════════════════════════════════════════════════════ */
+.section-rule {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-16) 0 var(--space-6);
+  font-family: var(--font-sans);
+  font-size: var(--size-caption);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.section-rule__num {
+  font-family: var(--font-display);
+  font-size: var(--size-body-lg);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-normal);
+  text-transform: none;
+  color: var(--text-faint);
+  font-variant-numeric: lining-nums;
+}
+
+.section-rule::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Controls
+   ═══════════════════════════════════════════════════════════════ */
 .input {
   width: 100%;
+  min-height: var(--control-height);
   padding: var(--space-2) var(--space-3);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-strong);
+  font-family: var(--font-sans);
+  font-size: var(--size-body);
   outline: none;
   appearance: none;
-  transition: border-color var(--transition);
+  transition: var(--motion-hover), box-shadow var(--dur-fast) var(--ease-standard);
 }
 
 .input::placeholder {
-  color: var(--text-tertiary);
+  color: var(--text-faint);
 }
 
+.input:hover {
+  border-color: var(--border-strong);
+}
+
+/* Fields take a soft 3px ring on top of the border shift */
 .input:focus {
-  border-color: var(--accent-border);
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 textarea.input {
   resize: vertical;
-  line-height: 1.7;
+  line-height: var(--leading-normal);
+  padding: var(--space-3);
 }
 
-/* ─────────────────────────────────────────────
-   Inline accent link & bare text button
-───────────────────────────────────────────── */
-.link {
-  color: var(--text-accent);
-  border-bottom: 1px solid var(--accent-border);
-  transition: color var(--transition), border-color var(--transition);
+/* Primary action — ink fill, paper mark. There is no brand hue. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--control-height);
+  padding: 0 var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--size-body);
+  font-weight: var(--weight-medium);
+  background: var(--action-primary-bg);
+  color: var(--action-primary-fg);
+  transition: var(--motion-hover), opacity var(--dur-fast) var(--ease-standard);
 }
 
-.link:hover {
-  color: var(--text-accent-hover);
-  border-color: var(--accent);
+.btn:hover:not(:disabled) {
+  background: var(--action-primary-hover);
 }
 
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Secondary — hairline that fills with sand on hover */
+.btn--secondary {
+  background: transparent;
+  color: var(--text-strong);
+  border-color: var(--border-strong);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background: var(--bg-sunken);
+  border-color: var(--stone);
+}
+
+/* Bare text button — the quietest action in the system */
 .text-btn {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  letter-spacing: 0.04em;
-  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+  font-size: var(--size-body-sm);
+  color: var(--text-muted);
   padding: var(--space-1) 0;
-  cursor: pointer;
-  transition: color var(--transition);
+  transition: color var(--dur-fast) var(--ease-standard);
 }
 
 .text-btn:hover {
-  color: var(--text-accent);
+  color: var(--text-strong);
 }
 
-/* ─────────────────────────────────────────────
-   Section Divider
-───────────────────────────────────────────── */
-.section-rule {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  margin: var(--space-8) 0 var(--space-6);
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
+/* ═══════════════════════════════════════════════════════════════
+   Inline link — ink, underlined by a hairline; hover drops opacity
+   ═══════════════════════════════════════════════════════════════ */
+.link {
+  color: var(--text-strong);
+  border-bottom: 1px solid var(--border-strong);
+  transition: opacity var(--dur-fast) var(--ease-standard),
+              border-color var(--dur-fast) var(--ease-standard);
 }
 
-.section-rule::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
+.link:hover {
+  opacity: 0.7;
+  border-bottom-color: var(--ink);
 }
 
-/* ─────────────────────────────────────────────
-   Tags
-───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   Tag — the smallest chip: 2px corners, sand fill
+   ═══════════════════════════════════════════════════════════════ */
 .tag {
   display: inline-flex;
   align-items: center;
-  padding: 1px var(--space-2);
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--tag-text);
-  background: var(--tag-bg);
-  border: 1px solid var(--tag-border);
+  padding: 3px var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--size-caption);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  line-height: 1.4;
+  color: var(--text-body);
+  background: var(--bg-sunken);
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  transition: background var(--transition), border-color var(--transition);
+  transition: var(--motion-hover);
 }
 
 .tag:hover {
-  background: var(--accent-subtle);
-  border-color: var(--accent-border);
+  border-color: var(--border-sunken);
+  color: var(--text-strong);
 }
 
-/* ─────────────────────────────────────────────
-   Markdown Prose (Blog Posts)
-───────────────────────────────────────────── */
+.tag--active {
+  background: var(--bg-brand);
+  border-color: var(--bg-brand);
+  color: var(--text-on-ink);
+}
+
+.tag--active:hover {
+  color: var(--text-on-ink);
+  border-color: var(--bg-brand);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Prose — long-form post typography
+   ═══════════════════════════════════════════════════════════════ */
 .prose {
   font-family: var(--font-body);
-  font-size: 1.0625rem;
+  font-size: var(--size-body-lg);
   line-height: 1.85;
-  color: var(--text-primary);
+  color: var(--text-body);
 }
 
+/* Headings inside an article are functional, so they take the grotesque.
+   The display face stays reserved for the article title and pull quotes. */
 .prose h1,
 .prose h2,
 .prose h3,
 .prose h4,
 .prose h5,
 .prose h6 {
-  font-family: var(--font-ui);
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-top: var(--space-10);
+  font-family: var(--font-sans);
+  font-weight: var(--weight-semibold);
+  color: var(--text-strong);
+  margin-top: var(--space-12);
   margin-bottom: var(--space-4);
-  line-height: 1.3;
-  letter-spacing: -0.01em;
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
 }
 
-.prose h1 { font-size: var(--text-2xl); }
+.prose h1 { font-size: var(--size-h1); }
+
 .prose h2 {
-  font-size: var(--text-xl);
-  padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--border);
+  font-size: var(--size-h2);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
 }
-.prose h3 { font-size: var(--text-lg); }
-.prose h4 { font-size: var(--text-base); }
+
+.prose h3 { font-size: var(--size-h3); }
+.prose h4 { font-size: var(--size-body-lg); }
 
 .prose p {
   margin-bottom: var(--space-5);
 }
 
 .prose a {
-  color: var(--text-accent);
-  border-bottom: 1px solid var(--accent-border);
-  transition: color var(--transition), border-color var(--transition);
+  color: var(--text-strong);
+  border-bottom: 1px solid var(--border-strong);
+  transition: opacity var(--dur-fast) var(--ease-standard),
+              border-color var(--dur-fast) var(--ease-standard);
 }
 
 .prose a:hover {
-  color: var(--text-accent-hover);
-  border-color: var(--accent);
+  opacity: 0.7;
+  border-bottom-color: var(--ink);
 }
 
 .prose strong {
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
 }
 
 .prose em {
   font-style: italic;
-  color: var(--text-secondary);
 }
 
 .prose ul,
@@ -387,98 +581,110 @@ textarea.input {
 }
 
 .prose li::marker {
-  color: var(--text-accent);
+  color: var(--text-faint);
 }
 
+/* Pull quote — one of the few places the display face is allowed out */
 .prose blockquote {
-  margin: var(--space-6) 0;
-  padding: var(--space-4) var(--space-6);
-  border-left: 2px solid var(--accent);
-  background: var(--accent-subtle);
-  color: var(--text-secondary);
+  margin: var(--space-8) 0;
+  padding-left: var(--space-6);
+  border-left: 2px solid var(--border-strong);
+  font-family: var(--font-display);
+  font-size: var(--size-h3);
   font-style: italic;
+  line-height: var(--leading-relaxed);
+  color: var(--text-strong);
 }
 
 .prose blockquote p { margin-bottom: 0; }
 
 .prose code {
-  font-family: var(--font-code);
-  font-size: 0.875em;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
   padding: 2px 6px;
-  background: var(--code-bg);
-  border: 1px solid var(--code-border);
+  background: var(--bg-sunken);
   border-radius: var(--radius-sm);
-  color: var(--text-accent);
+  color: var(--text-strong);
 }
 
 .prose pre {
-  margin: var(--space-6) 0;
+  position: relative;
+  margin: var(--space-8) 0;
   padding: var(--space-5);
-  background: var(--code-bg) !important;
-  border: 1px solid var(--code-border);
-  border-radius: var(--radius-md);
+  background: var(--bg-sunken) !important;
+  border: 1px solid var(--border-sunken);
+  border-radius: var(--radius-lg);
   overflow-x: auto;
   tab-size: 2;
   scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  scrollbar-color: var(--border-strong) transparent;
 }
 
 .prose pre code {
-  font-family: var(--font-code);
-  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  font-size: var(--size-body-sm);
+  line-height: var(--leading-normal);
   padding: 0;
   background: none;
-  border: none;
-  color: inherit;
   border-radius: 0;
+  color: inherit;
 }
 
-/* Shiki dual-theme — defaultColor: false: colors come from CSS vars, bg only on container */
-.shiki {
-  font-family: var(--font-code) !important;
-}
-
-/* Only apply color to spans; background must stay transparent to avoid per-span stripes */
+/*
+  Shiki dual theme — defaultColor:false, so colours arrive as CSS vars.
+  Paper mode is the default now, so --shiki-light is the base and ink mode
+  swaps it. Backgrounds stay transparent: the container tone is the only
+  surface, otherwise every span paints its own stripe.
+*/
+.shiki,
 .shiki span {
-  font-family: var(--font-code) !important;
-  color: var(--shiki-dark);
+  font-family: var(--font-mono) !important;
+}
+
+/* Only spans lose their background — the <pre> keeps the sand surface above */
+.shiki span {
+  color: var(--shiki-light);
   background: transparent !important;
 }
 
-[data-theme="light"] .shiki span {
-  color: var(--shiki-light);
+[data-theme="dark"] .shiki span {
+  color: var(--shiki-dark);
 }
 
 .prose hr {
-  margin: var(--space-10) 0;
+  margin: var(--space-12) 0;
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .prose img {
   max-width: 100%;
-  border-radius: var(--radius-md);
-  margin: var(--space-6) auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  margin: var(--space-8) auto;
 }
 
 .prose table {
   width: 100%;
   border-collapse: collapse;
-  margin: var(--space-6) 0;
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
+  margin: var(--space-8) 0;
+  font-family: var(--font-sans);
+  font-size: var(--size-body);
 }
 
 .prose th {
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
   text-align: left;
-  border-bottom: 1px solid var(--accent-border);
-  color: var(--text-accent);
-  font-weight: 500;
+  border-bottom: 1px solid var(--border-strong);
+  color: var(--text-strong);
+  font-weight: var(--weight-medium);
+  font-size: var(--size-caption);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
 }
 
 .prose td {
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -486,56 +692,78 @@ textarea.input {
   border-bottom: none;
 }
 
-/* ─────────────────────────────────────────────
-   Focus visible
-───────────────────────────────────────────── */
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* ─────────────────────────────────────────────
-   Code block copy button (injected via PostPage.vue)
-───────────────────────────────────────────── */
-.prose pre {
-  position: relative;
-}
-
+/* ═══════════════════════════════════════════════════════════════
+   Code block copy button (injected by PostPage.vue)
+   ═══════════════════════════════════════════════════════════════ */
 .copy-btn {
   position: absolute;
   top: var(--space-2);
   right: var(--space-2);
   padding: 2px var(--space-2);
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  background: var(--bg-hover);
-  border: 1px solid var(--border);
+  font-family: var(--font-sans);
+  font-size: var(--size-caption);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-sunken);
   border-radius: var(--radius-sm);
-  cursor: pointer;
   opacity: 0;
-  transition: opacity var(--transition), color var(--transition), border-color var(--transition);
-  line-height: 1.6;
+  line-height: 1.7;
   user-select: none;
+  transition: var(--motion-hover), opacity var(--dur-fast) var(--ease-standard);
 }
 
 .prose pre:hover .copy-btn {
   opacity: 1;
 }
 
+.copy-btn:hover {
+  color: var(--text-strong);
+  border-color: var(--border-strong);
+}
+
 .copy-btn--copied {
-  color: var(--text-accent) !important;
-  border-color: var(--accent-border) !important;
+  background: var(--bg-brand) !important;
+  border-color: var(--bg-brand) !important;
+  color: var(--text-on-ink) !important;
   opacity: 1 !important;
 }
 
-/* ─────────────────────────────────────────────
-   Reduced Motion
-───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   Focus — 2px ring at 2px offset
+   ═══════════════════════════════════════════════════════════════ */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Fields already draw their own ring; the outline would double it up */
+.input:focus-visible {
+  outline: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Reduced motion
+   ═══════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Narrow screens — the display scale has to come down or it wraps
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  :root {
+    --size-display-xl: 56px;
+    --size-display-lg: 44px;
+    --size-display-md: 32px;
+    --size-h1: 27px;
+    --size-h2: 22px;
+    --size-h3: 18px;
   }
 }

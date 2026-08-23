@@ -28,16 +28,29 @@ npm run rss          # regenerate public/rss.xml standalone (also runs automatic
 
 ### State & routing
 
-- Theme (dark/light, default dark) lives in `src/composables/useTheme.ts` — module-level `shallowRef`, no store library. It is persisted to `localStorage` and applied as the `data-theme` attribute on `<html>`. The inline script in `index.html` applies the stored theme **before first paint**; the composable only writes on change. If you touch either side, keep them in sync or light-theme users get a dark flash.
+- Theme (light/dark, **default light**) lives in `src/composables/useTheme.ts` — module-level `shallowRef`, no store library. needle is a paper-first system, so light is the ground state and dark is the opt-in "ink mode". It is persisted to `localStorage` and applied as the `data-theme` attribute on `<html>`. `index.html` ships `data-theme="light"` in the tag and its inline script upgrades to `dark` **before first paint**; the composable only writes on change. If you touch either side, keep them in sync or ink-mode users get a paper flash.
 - Router uses `createWebHashHistory` (hash URLs) so GitHub Pages needs no server config. There is deliberately **no** `<RouterView>` transition — `mode="out-in"` added dead time to every navigation.
 
 ### Styling
 
-All design tokens are CSS custom properties in `src/styles/main.css`. Both themes (`[data-theme="light"]`) are defined there. The `.prose` class handles all markdown post typography. Shiki dual-theme syntax highlighting uses `--shiki-dark` / `--shiki-light` CSS variables.
+The whole visual layer is the **needle design system** (pulled from Claude Design, project `needle Design System`). Its own one-line brief: *minimal, warm, near-monochrome SaaS; distinctiveness comes from type; no gradients, no emoji, hairline borders before shadows.*
 
-Font stack: `--font-ui` (IBM Plex Mono) for all UI chrome, `--font-body` (Noto Serif SC) for post content, `--font-code` (JetBrains Mono) for code blocks. Fonts are `<link>`-ed from `index.html`, **not** `@import`-ed from CSS (an `@import` is only discovered after the stylesheet parses, serialising the requests). Only the weights actually in use are requested — the CJK face is heavy, so adding a weight there has a real cost.
+All tokens are CSS custom properties in `src/styles/main.css`, named exactly as needle names them so the code and the design system speak the same language:
 
-Motion budget: one duration token (`--transition`, 120ms) for the whole site, applied only to `color`, `background`, `border-color` and `opacity`. Avoid `backdrop-filter`, persistent `filter`, hover `transform`, and transitions on layout properties (`width`, `height`) — those were the measured sources of scroll and navigation jank.
+- **Colour** — a warm greige ramp (`--paper` → `--sand` → `--ink`) plus muted warm semantics. Components must use the *aliases* (`--bg-app`, `--bg-surface`, `--bg-sunken`, `--text-strong/body/muted/faint`, `--border-subtle/strong/sunken`, `--action-primary-*`), never the raw ramp. **There is no brand hue — the accent is ink itself.** Anything reaching for a gold/blue "accent colour" is off-system.
+- **Type** — `--font-display` (Bodoni Moda) is reserved for hero moments: the wordmark, the home name, page and post titles, big numerals, pull quotes. `--font-sans` (Space Grotesk) carries every functional surface. `--font-mono` (Space Mono) carries numbers — dates, counts, indexes. `--font-body` (Noto Serif SC) is the long-form reading face. The Latin faces have no CJK glyphs, so the display and sans stacks fall through to Noto Serif SC / the system UI face per-glyph; that fallthrough is deliberate, don't "fix" it.
+- **Labels** — the `.eyebrow` class (uppercase Space Grotesk, `--tracking-caps`) is the system's label voice. `.section-rule` pairs a display numeral with an eyebrow and a hairline.
+- **Radii** — sharp: 2px chips, 4px controls, 8px cards. Nothing is very round.
+- **Elevation** — hairline border first, shadow second. Cards are flat by default; hover shifts border and background one warm step.
+- Fonts are `<link>`-ed from `index.html`, **not** `@import`-ed from CSS (an `@import` is only discovered after the stylesheet parses, serialising the requests). Only the weights actually in use are requested — the CJK face is heavy, so adding a weight there has a real cost.
+- The `.prose` class handles all markdown post typography. Shiki dual-theme highlighting (`vitesse-light` / `vitesse-dark`) resolves through `--shiki-light` / `--shiki-dark`; paper is the default and `[data-theme="dark"]` swaps it.
+
+**Two needle rules are deliberately not followed**, because they lose to measured performance on this site:
+
+1. needle specifies `backdrop-filter: blur(10px)` on sticky chrome. The navbar stays **opaque** — backdrop-filter re-blurs everything under the header on every scroll frame and was the biggest source of scroll stutter here.
+2. needle specifies a 2px hover lift on interactive cards and a 0.5px press nudge on buttons. Hover `transform` is out; cards respond with border and background instead.
+
+The rest of the motion budget stands: durations come from `--dur-fast/base/slow` with `--ease-standard`, and transitions apply only to `color`, `background`, `border-color` and `opacity` — never layout properties.
 
 ### Personalisation
 

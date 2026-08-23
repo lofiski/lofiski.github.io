@@ -1,16 +1,20 @@
 import { shallowRef, watch } from 'vue'
 
-export type Theme = 'dark' | 'light'
+export type Theme = 'light' | 'dark'
 
 const STORAGE_KEY = 'theme'
 
+/*
+ * needle is a paper-first system — warm paper is the ground and ink is the
+ * mark — so 'light' is the default and 'dark' is the opt-in ink mode.
+ */
 function read(): Theme {
   try {
-    return localStorage.getItem(STORAGE_KEY) === 'light' ? 'light' : 'dark'
+    return localStorage.getItem(STORAGE_KEY) === 'dark' ? 'dark' : 'light'
   }
   catch {
     // Storage can be unavailable (private mode / blocked cookies)
-    return 'dark'
+    return 'light'
   }
 }
 

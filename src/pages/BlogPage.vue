@@ -44,10 +44,11 @@ function toggleTag(tag: string) {
 
 <template>
   <div class="container">
-    <div class="page-header">
+    <header class="page-header">
+      <p class="eyebrow">writing</p>
       <h1 class="page-title">博客</h1>
-      <span class="page-count">{{ allPosts.length }} 篇</span>
-    </div>
+      <span class="page-sub">{{ allPosts.length }} 篇 · 按时间倒序</span>
+    </header>
 
     <!-- Filters -->
     <div class="filters">
@@ -64,8 +65,8 @@ function toggleTag(tag: string) {
           :key="tag"
           class="tag"
           :class="{ 'tag--active': selectedTag === tag }"
-          @click="toggleTag(tag)"
           :aria-pressed="selectedTag === tag"
+          @click="toggleTag(tag)"
         >
           {{ tag }}
         </button>
@@ -89,19 +90,13 @@ function toggleTag(tag: string) {
 .filters {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
 }
 
 .tag-filters {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-}
-
-.tag--active {
-  background: var(--accent-subtle);
-  border-color: var(--accent);
-  color: var(--text-accent);
 }
 </style>

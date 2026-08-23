@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="zh-CN" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,29 +10,38 @@
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@airlofi" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F7F5F1" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131210" />
     <link rel="canonical" href="https://125815.xyz" />
     <title>airlofi</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate" type="application/rss+xml" title="lofiski's blog" href="/rss.xml" />
 
-    <!-- Apply the stored theme before first paint, otherwise light-theme users flash dark. -->
+    <!--
+      Apply the stored theme before first paint. needle is a paper-first system,
+      so light is the default in the attribute above and only a stored 'dark'
+      overrides it — otherwise paper-theme users flash ink.
+    -->
     <script>
       try {
-        var t = localStorage.getItem('theme')
-        if (t === 'light') document.documentElement.setAttribute('data-theme', 'light')
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark')
+        }
       } catch (e) {}
     </script>
 
     <!--
-      Fonts are linked here rather than @import-ed from main.css: an @import is only
+      needle's three faces, plus Noto Serif SC which carries the CJK half of the
+      display and body stacks (the Latin faces have no Chinese glyphs).
+      Linked here rather than @import-ed from main.css: an @import is only
       discovered after the stylesheet is parsed, which serialises the requests.
-      Only the weights actually used are requested — CJK faces are heavy.
+      Only the weights actually used are requested — the CJK face is heavy.
     -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@400;700&family=JetBrains+Mono:wght@400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..500&family=Space+Grotesk:wght@400;500;600&family=Space+Mono:wght@400&family=Noto+Serif+SC:wght@400;700&display=swap"
     />
   </head>
   <body>
